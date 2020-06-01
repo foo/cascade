@@ -1,5 +1,4 @@
- 
- \documentclass[]{article}
+ \documentclass[a4paper,anonymous,USenglish]{lipics-v2019}
  
  \usepackage[utf8]{inputenc}
  \usepackage{xspace}
@@ -8,7 +7,6 @@
  \usepackage{algorithmic}
  
  \usepackage{balance}
- \usepackage[english]{babel}
  \usepackage{blindtext}
  \usepackage{amsthm,amsmath,array,colortbl,graphicx,multirow}
  \usepackage{comment}
@@ -30,8 +28,6 @@
  \mathchardef\mhyphen="2D
  
  \title{Cascade Hypothesis for Dynamic Balanced Graph Partitioning}
- \date{}
-
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&&
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&&
  %  our macros start
@@ -39,12 +35,14 @@
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&&
  
  \newcommand{\OPT}{\textsf{OPT}\xspace}
+ \newcommand{\ONL}{\textsf{ONL}\xspace}
+ \newcommand{\DET}{\textsf{CAS}\xspace}
  \newcommand{\ALG}{\textsf{ALG}\xspace}
  \newcommand{\PPL}{\textsf{PPL}\xspace}
  \newcommand{\OBRP}{BRP}
  \newcommand{\PPOBRP}{PP-BRP}
  \newcommand{\dist}{\textsf{dist}}
- \newcommand{\TAlg}{{\ensuremath{\textsf{ALG}_{3}}}\xspace}
+ \newcommand{\TAlg}{{\ensuremath{\textsf{CAS}}}\xspace}
  
  \newcommand{\comm}{\textsc{comm}}
  \newcommand{\OFF}{\textsc{Off}\xspace}
@@ -53,8 +51,6 @@
  
  
  
- \newtheorem{claim}{Claim}
- \newtheorem{theorem}{Theorem}
  \newtheorem{fact}{Fact}
  \newtheorem{rem}{Remark}
  \newtheorem{observation}{Observation}
@@ -74,13 +70,137 @@
  %\newcommand\stefan[1]{}
  %\newcommand\maciek[1]{}
  
- 
  \newcommand{\todo}[1]{\noindent\color{brown}{todo: #1}\color{black}}
 
 \begin{document}
 
 \maketitle
 
+\section{Intro}
+
+The cascade hypothesis aims to bound a cost of reconfiguration of an algorithm
+\DET for Dynamic Balanced Graph Partitioning.
+
+\section{Problem Definition of Dynamic Balanced Graph Partitioning}
+
+
+There is a set of $n$ nodes, initially distributed arbitrarily
+across $\ell$~clusters, each of size~$k$. We call two nodes~$u,v\in V$
+\emph{collocated} if they are in the same cluster.
+
+An input to the problem is a sequence of communication requests $\sigma =
+(u_1,v_1),$ $(u_2,v_2),$ $(u_3,v_3), \ldots$, where pair $(u_t,v_t)$ means that
+the nodes $u_t,v_t$ exchange a fixed amount of data. For succinctness of later descriptions,
+we assume that a request $(u_t,v_t)$ occurs at time $t \geq 1$. At any time~$t
+\geq 1$, an online algorithm needs to serve the~communication
+request~$(u_t,v_t)$. Right before serving the request, the online algorithm
+can repartition the nodes into new clusters. We assume that
+a~communication request between two collocated nodes costs 0. The cost of a~communication request between two nodes located in different clusters is
+normalized to~1, and the cost of migrating a node from one cluster to another
+is~$\alpha \geq 1$, where $\alpha$ is a parameter (an~integer). For any
+algorithm \ALG, we denote its total cost (consisting of communication plus
+migration costs) on sequence $\sigma$ by $\ALG(\sigma)$.
+
+We will estimate
+the performance of an online algorithm by comparing to the performance of an optimal offline
+algorithm. Formally, let~$\ONL(\sigma)$, resp.~$\OPT(\sigma)$, be the cost
+incurred by an online algorithm \ONL, resp.~by an optimal offline
+algorithm \OPT, for a given sequence of requests~$\sigma$. In contrast to \ONL, which learns the~requests one-by-one as
+it serves them, \OPT has complete knowledge of the entire request
+sequence~$\sigma$ \emph{ahead of~time}. The goal is to design online repartitioning
+algorithms that provide worst-case guarantees. In particular, $\ONL$ is said
+to be \emph{$\rho$-competitive} if there is a constant $\beta$, such that for any
+input sequence~$\sigma$ it holds that
+\[
+	\ONL(\sigma) \leq \rho \cdot \OPT(\sigma) + \beta.
+\]
+Note that $\beta$ cannot depend on input $\sigma$ but can depend on other
+parameters of the problem, such as the number of nodes or the number of clusters.
+The minimum $\rho$ for which $\ONL$ is $\rho$-competitive is called the 
+\emph{competitive ratio} of $\ONL$. 
+
+
+The nodes fit perfectly into the clusters,
+i.e.,~$n=k\cdot \ell$. Due to cluster capacity
+constraints, a node can never be migrated alone, but it must be \emph{swapped}
+with another node at a cost of~$2 \cdot \alpha$. We also assume that when an
+algorithm wants to migrate more than two nodes, this has to be done using
+several swaps, each involving two nodes.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{The algorithm CAS}
+\label{sec:upper}
+
+We start with a straightforward $O(k^2
+\cdot \ell^2)$-competitive deterministic algorithm \DET. At any time, \DET
+serves a request, adjusts its internal structures (defined below)
+accordingly and then possibly migrates some nodes. \DET operates in phases, and each
+phase is analyzed separately. The first phase starts with the first request.
+
+In a single phase, \DET maintains a helper structure: a complete graph on all
+$\ell \cdot k$ nodes, with an edge present between each pair of nodes. We say
+that a communication request is \emph{paid} (by \DET) if it occurs between
+nodes from different clusters, and thus entails a cost for \DET. For each edge
+between nodes $x$ and $y$, we define its weight~$w(x,y)$ to be the number of
+paid communication requests between $x$ and~$y$ since the beginning of~the~current phase.
+
+Whenever an edge weight reaches $\alpha$, it is called \emph{saturated}. If a
+request causes the corresponding edge to~become saturated,
+\DET computes a new placement of nodes (potentially for all of them), so that all
+saturated edges are inside clusters (there is only one new saturated edge);
+among all possibly placements, \DET chooses the closest to the current
+configuration. If finding such placement
+this is not possible, node positions are not changed, the~current phase ends
+with the current request, and a new phase begins with the next request. Note
+that all edge weights are reset to zero at the beginning of a phase.
+
+
+\begin{theorem}
+\DET is $O(k^2 \cdot \ell^2)$-competitive.
+\end{theorem}
+
+\begin{proof}
+We bound the costs of \DET and \OPT in a single phase. First, observe that
+whenever an~edge weight reaches $\alpha$, its endpoint nodes will be collocated 
+until the end of the phase, and therefore its weight is not
+incremented anymore. Hence the weight of any edge is at most $\alpha$.
+
+Second, observe that the graph induced by saturated edges always constitutes 
+a~forest. Suppose that, at a time $t$,
+two nodes $x$ and~$y$, which are not
+connected by a~saturated edge, become connected by a path of saturated edges.
+From that time onward, \DET stores them in a~single cluster. Hence, the
+weight~$w(x,y)$ cannot increase at subsequent time points, and $(x,y)$ may
+not become saturated. The forest property implies that the number of saturated
+edges is smaller than $k \cdot \ell$.
+
+The two observations above allow us to bound the cost of \DET in a single
+phase. The number of reorganizations is at most the number of saturated edges,
+i.e., at most~$k \cdot \ell$. As the cost associated with a single
+reorganization is $O(k \cdot \ell \cdot \alpha)$, the total cost of all node
+migrations in a single phase is at most $O(k^2 \cdot \ell^2 \cdot \alpha)$.
+The communication cost itself is equal to the total weight of all edges, and
+by the first observation, it is at most $\binom{k \cdot \ell}{2}
+\cdot \alpha < k^2 \cdot \ell^2 \cdot \alpha$. Hence, for any phase $P$ (also
+for the last one), it holds that $\DET(P) = O(k^2 \cdot \ell^2 \cdot \alpha)$.
+
+Now we lower-bound the cost of \OPT on any phase $P$ but the last one. If \OPT
+performs a~node swap in $P$, it pays $2 \cdot \alpha$. Otherwise its assignment of
+nodes to clusters is fixed throughout~$P$. Recall that at the end of $P$, \DET
+failed to reorganize the nodes. This means that for any static mapping of the
+nodes to clusters (in particular the one chosen by \OPT), there is a~saturated inter-cluster edge. The communication cost over such an~edge incurred
+by \OPT is at least $\alpha$ (it can be also strictly greater than~$\alpha$ as
+the edge weight only counts the communication requests paid by \DET).
+
+Therefore, the $\DET$-to-$\OPT$ cost ratio in any phase but the last one is at
+most $O(k^2 \cdot \ell^2)$ and the cost of \DET on the last phase is at
+most $O(k^2 \cdot \ell^2 \cdot \alpha)$. Hence,
+$\DET(\sigma) \leq O(k^2 \cdot \ell^2) \cdot \OPT(\sigma) + O(k^2 \cdot
+\ell^2 \cdot \alpha)$ for any input $\sigma$.
+\end{proof}
 
 
 \section{Bounding the cost of a single reconfiguration of components}
