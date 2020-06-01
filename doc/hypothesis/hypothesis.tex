@@ -101,6 +101,17 @@ is~$\alpha \geq 1$, where $\alpha$ is a parameter (an~integer). For any
 algorithm \ALG, we denote its total cost (consisting of communication plus
 migration costs) on sequence $\sigma$ by $\ALG(\sigma)$.
 
+The nodes fit perfectly into the clusters,
+i.e.,~$n=k\cdot \ell$. Due to cluster capacity
+constraints, a node can never be migrated alone, but it must be \emph{swapped}
+with another node at a cost of~$2 \cdot \alpha$. We also assume that when an
+algorithm wants to migrate more than two nodes, this has to be done using
+several swaps, each involving two nodes.
+
+\section{Online Algorithms and Competitive analysis}
+
+\maciek{Input sequence online}
+
 We will estimate
 the performance of an online algorithm by comparing to the performance of an optimal offline
 algorithm. Formally, let~$\ONL(\sigma)$, resp.~$\OPT(\sigma)$, be the cost
@@ -120,12 +131,6 @@ The minimum $\rho$ for which $\ONL$ is $\rho$-competitive is called the
 \emph{competitive ratio} of $\ONL$. 
 
 
-The nodes fit perfectly into the clusters,
-i.e.,~$n=k\cdot \ell$. Due to cluster capacity
-constraints, a node can never be migrated alone, but it must be \emph{swapped}
-with another node at a cost of~$2 \cdot \alpha$. We also assume that when an
-algorithm wants to migrate more than two nodes, this has to be done using
-several swaps, each involving two nodes.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
