@@ -28,6 +28,9 @@
  \mathchardef\mhyphen="2D
  
  \title{Cascade Hypothesis for Dynamic Balanced Graph Partitioning}
+ \author{x}{y}{}{}{}
+
+
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&&
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&&
  %  our macros start
@@ -52,6 +55,7 @@
  
  
  \newtheorem{fact}{Fact}
+ \newtheorem{hypothesis}{Hypothesis}
  \newtheorem{rem}{Remark}
  \newtheorem{observation}{Observation}
  \newtheorem{property}{Property}
@@ -76,31 +80,25 @@
 
 \maketitle
 
-\section{Intro}
-
-The cascade hypothesis aims to bound a cost of reconfiguration of an algorithm
-\DET for Dynamic Balanced Graph Partitioning.
-
 \section{Problem Definition of Dynamic Balanced Graph Partitioning}
 
 
-There is a set of $n$ nodes, initially distributed arbitrarily
+\noindent
+\textbf{Nodes and clusters.} There is a set of $n$ nodes, initially distributed arbitrarily
 across $\ell$~clusters, each of size~$k$. We call two nodes~$u,v\in V$
 \emph{collocated} if they are in the same cluster.
 
-An input to the problem is a sequence of communication requests $\sigma =
+\noindent
+\textbf{Input sequence.} An input to the problem is a sequence of communication requests $\sigma =
 (u_1,v_1),$ $(u_2,v_2),$ $(u_3,v_3), \ldots$, where pair $(u_t,v_t)$ means that
-the nodes $u_t,v_t$ exchange a fixed amount of data. For succinctness of later descriptions,
-we assume that a request $(u_t,v_t)$ occurs at time $t \geq 1$. At any time~$t
-\geq 1$, an online algorithm needs to serve the~communication
-request~$(u_t,v_t)$. Right before serving the request, the online algorithm
-can repartition the nodes into new clusters. We assume that
-a~communication request between two collocated nodes costs 0. The cost of a~communication request between two nodes located in different clusters is
-normalized to~1, and the cost of migrating a node from one cluster to another
-is~$\alpha \geq 1$, where $\alpha$ is a parameter (an~integer). For any
-algorithm \ALG, we denote its total cost (consisting of communication plus
-migration costs) on sequence $\sigma$ by $\ALG(\sigma)$.
+the nodes $u_t,v_t$ exchange a fixed amount of data. At any time~$t
+$, an algorithm needs to serve the~communication
+request~$(u_t,v_t)$.
 
+
+\noindent
+\textbf{Reconfigurations.} Right before serving the request, the algorithm
+can move nodes between clusters.
 The nodes fit perfectly into the clusters,
 i.e.,~$n=k\cdot \ell$. Due to cluster capacity
 constraints, a node can never be migrated alone, but it must be \emph{swapped}
@@ -108,11 +106,22 @@ with another node at a cost of~$2 \cdot \alpha$. We also assume that when an
 algorithm wants to migrate more than two nodes, this has to be done using
 several swaps, each involving two nodes.
 
-\section{Online Algorithms and Competitive analysis}
+\noindent
+\textbf{The cost.} We assume that
+a~communication request between two collocated nodes (i.e., placed on the same
+server) costs 0. The cost of a~communication request between two nodes located in different clusters is
+1, and the cost of migrating a node from one cluster to another
+is~$\alpha \geq 1$, where $\alpha$ is a parameter (an~integer). 
+The total cost of an algorithm \ALG, consisting of communication plus migration
+cost.
 
-\maciek{Input sequence online}
+\subsection{Online Algorithms and Competitive Analysis}
 
-We will estimate
+The input to the problem is revealed one-by-one, in online fashion. Upon seeing
+a request, the algorithm must serve it without the knowledge of future requests
+(although prior to serving the request, it can reconfigure the nodes).
+
+We measure
 the performance of an online algorithm by comparing to the performance of an optimal offline
 algorithm. Formally, let~$\ONL(\sigma)$, resp.~$\OPT(\sigma)$, be the cost
 incurred by an online algorithm \ONL, resp.~by an optimal offline
@@ -120,18 +129,22 @@ algorithm \OPT, for a given sequence of requests~$\sigma$. In contrast to \ONL, 
 it serves them, \OPT has complete knowledge of the entire request
 sequence~$\sigma$ \emph{ahead of~time}. The goal is to design online repartitioning
 algorithms that provide worst-case guarantees. In particular, $\ONL$ is said
-to be \emph{$\rho$-competitive} if there is a constant $\beta$, such that for any
+to be \emph{$\rho$-competitive} if for any
 input sequence~$\sigma$ it holds that
 \[
-	\ONL(\sigma) \leq \rho \cdot \OPT(\sigma) + \beta.
+    \ONL(\sigma) \leq \rho \cdot \OPT(\sigma).
 \]
-Note that $\beta$ cannot depend on input $\sigma$ but can depend on other
 parameters of the problem, such as the number of nodes or the number of clusters.
 The minimum $\rho$ for which $\ONL$ is $\rho$-competitive is called the 
 \emph{competitive ratio} of $\ONL$. 
 
-
-
+\noindent
+\textbf{Note on running time.}
+Although it is vital to keep the running time of an online algorithm low, it is
+not a strict requirement. In contrast to exact algorithms or approximation
+algorithms, the running time of an online algorithm may be exponential.
+The algorithmic challenge lies in making decisions without the knowledge of the
+future.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -139,7 +152,7 @@ The minimum $\rho$ for which $\ONL$ is $\rho$-competitive is called the
 \section{The algorithm CAS}
 \label{sec:upper}
 
-We start with a straightforward $O(k^2
+We introduce $O(k^2
 \cdot \ell^2)$-competitive deterministic algorithm \DET. At any time, \DET
 serves a request, adjusts its internal structures (defined below)
 accordingly and then possibly migrates some nodes. \DET operates in phases, and each
@@ -155,16 +168,17 @@ paid communication requests between $x$ and~$y$ since the beginning of~the~curre
 Whenever an edge weight reaches $\alpha$, it is called \emph{saturated}. If a
 request causes the corresponding edge to~become saturated,
 \DET computes a new placement of nodes (potentially for all of them), so that all
-saturated edges are inside clusters (there is only one new saturated edge);
-among all possibly placements, \DET chooses the closest to the current
+saturated edges are inside clusters (there is only one new saturated edge).
+Among all possible placements, \DET chooses the closest to the current
 configuration. If finding such placement
-this is not possible, node positions are not changed, the~current phase ends
+is not possible, node positions are not changed, the~current phase ends
 with the current request, and a new phase begins with the next request. Note
 that all edge weights are reset to zero at the beginning of a phase.
 
 
 \begin{theorem}
 \DET is $O(k^2 \cdot \ell^2)$-competitive.
+\label{th:detsqare}
 \end{theorem}
 
 \begin{proof}
@@ -208,19 +222,51 @@ $\DET(\sigma) \leq O(k^2 \cdot \ell^2) \cdot \OPT(\sigma) + O(k^2 \cdot
 \end{proof}
 
 
-\section{Bounding the cost of a single reconfiguration of components}
+\section{The Cascade Hypothesis.}
+
+Upon receiving a request, \DET may merge two of its components and consequently perform a
+reconfiguration of its nodes.
+The cascade hypothesis aims to bound the cost of such reconfiguration.
+
+In \cite{repartition-disc}, authors trivially bounded the reconfiguration cost
+for each merge action by $k \cdot \ell$ (the proof is given also in this
+manuscript in Theorem~\ref{th:detsqare}).
+This roughly corresponds to migrating every node in every cluster.
+In \cite{disc2020}, authors significantly improved the analysis of \DET for
+unsaturated edges (that in principle incur the cost $O(k^2\cdot \ell^2)$).
+This allows to bound the ratio by $O(k\cdot \ell \cdot f(k, \ell))$, where $f(k,
+\ell)$ is a bound on the cost of a single repartition.
+The best known lower bound is $\Omega(k\cdot \ell)$ \cite{disc2020}.
+
+\medskip
+
+In this manuscript, we state two hypotheses. Proving any of them brings an
+immediate improvement to the competitive ratio of \DET.
+
+\begin{hypothesis}\textbf{Strong cascade hypothesis.} The cost of a single
+reconfiguration of \DET can be bounded by $f$ that does not depend on $\ell$.
+\end{hypothesis}
+
+\begin{hypothesis}
+    \textbf{Weak cascade hypothesis.}
+The cost of a single reconfiguraton of \DET can be bounded by $f$ that is $o(\ell)$ (i.e., the dependency on $\ell$ is
+sublinear).
+\end{hypothesis}
+
+In both hypotheses, the cost of reconfiguration may be exponential in $k$.
+One can think that $k$ is usually small in comparison to $\ell$.
 
 
 \subsection{Characterization of the migration graph}
 
-Consider a component merge action performed by \TAlg that triggers a reconfiguration from a configuration $C_I$ to a configuration $C_F$.
-To execute the reconfiguration, the nodes of two non-collocated components migrate to a common cluster.
+Consider a single component merge action performed by \TAlg that triggers a reconfiguration from a configuration $C_I$ to a configuration $C_F$.
+To perform the reconfiguration, the nodes of two non-collocated components migrate to a common cluster.
 Each cluster contains exactly $k$ nodes, thus other nodes migrate to take the place of nodes of merged components.
-Their place must be occupied, too, and this way a single merge action may trigger migrations in clusters not directly involved in a merge action. 
-Recall that both $C_I$ and $C_F$ are component-respecting configurations, hence a migration of a single node entails migrations of all nodes of its cluster.
+The place they leave must be filled by other nodes, thus a single merge action may trigger migrations in clusters not directly involved in a merge action. 
+Both $C_I$ and $C_F$ are component-respecting configurations (i.e., saturated
+edges are kept inside clusters), hence a migration of a single node entails migrations of all nodes of its cluster.
 
-In Section~\ref{ssec:cascade}, we upper bound the cost incurred by a reconfiguration that follows a single component merge.
-To this end, we introduce a \emph{migration graph} that models the reconfiguration.
+To help analyzing the cost of a reconfiguration, we introduce a \emph{migration graph} that models the reconfiguration.
 In the following, we characterize the structure of the migration graph.
 
 \noindent
@@ -232,7 +278,10 @@ There are at most $3$ core vertices in each migration graph (at most two compone
 \noindent
 \textbf{Edges and their labels.}
 The edges of the migration graph denote the migration of nodes from $C_I$ to $C_F$.
-Each edge is labeled with a number $m$ that denotes the number of migrated nodes between clusters.
+Each edge is labeled with a set of components that migrate between clusters.
+The components are indistinguishable, hence the label is a multiset of component
+sizes.
+The \emph{weight} of an edge is the sum of sizes of components of its label.
 Each edge is directed from the cluster that contained the nodes to the cluster they migrated to.
 Both edges might exists between a pair of nodes, as whole components of nodes migrate, and the back-and-forth exchange may be needed for the configuration $C_F$ to be component-respecting.
 
@@ -246,7 +295,6 @@ This implies that the number of ingoing and outgoing edges is also bounded by $k
 \textbf{Flow preservation.}
 In any feasible configuration, each cluster contains exactly $k$ nodes.
 Thus, for any vertex, the sum of labels of ingoing edges must equal the sum of labels of outgoing edges.
-\maciek{Can we say that this implies that the graph is a circulation?}
 
 \noindent
 \textbf{Migration graph and the cost of reconfiguration.}
@@ -256,72 +304,8 @@ A trivial upper bound on the cost is the size of the connected component in the 
 
 \medskip
 
-Note that for a single component merge, multiple migration graphs may exist, and multiple of them might have the optimal cost.
-In Section \ref{ssec:cascade}, we show that among all migration graphs for given component merge, there exists an optimal graph with the bounded cycle length.
-Combined with other properties, this allows to bound the size of the migration graph, and consequently bound the cost of each repartition, that results in a bound of the competitive ratio for \TAlg.
-
-
-In this section we present an example of a merge action that results in a $k/3$(?) length cycle in an optimal migration graph.
-
-\subsection{Bounds on the size of a migration graph}
-\label{ssec:cascade}
-
-In \cite{repartition-disc}, authors trivially bounded the reconfiguration cost for each merge action by $k \cdot \ell$.
-This roughly corresponds to migrating every node in every cluster.
-Now, we bound the cost of a single repartition of \TAlg as a function of $k$.
-Note that the bound of $k \cdot \ell$ is still valid, and the resulting bound is the minimum of these two.
-
-We begin by bounding the length of each cycle in one of optimal solutions.
-
-
-\begin{theorem}
-	\label{th:cascade-cycles}
-	Consider a single merge action of \TAlg.
-	There exists an optimal cost reconfiguration with the migration graph, where each cycle have length at most $k$.
-\end{theorem}
-
-\begin{proof}
-	Assume the contrary, i.e., for each optimal cluster reconfiguration, its migration graph contains a cycle at least $k+1$.
-	
-	Fix a reconfiguration and its migration graph $G$ that has the shortest length $L$ of the longest cycle, and has the least number of cycles of length $L$.
-	Let $p = \lbrace v_1, v_2, \ldots, v_L \rbrace$ be any cycle of length $L$.
-	As edge labels are from $\{ 1, 2, \ldots, k \}$, there exists a pair of edges $e, f$ with equal labels.
-	
-	We show that in such case, we can modify the solution without affecting its cost and feasibility to decrease the number of cycles of length $L$ by $1$.
-	This would contradict the assumption that we consider a solution with the minimal number of cycles of length $L$.
-	
-	We construct a new migration graph $G'$ of equal cost by swapping the (destination) endpoints of $e$ and $f$ (cf. Figure~\ref{fig:cascade-illustration})
-	Formally, let $\lbrace a, b \rbrace = e$ and $\lbrace c, d \rbrace = f$.
-	We remove $e$ and $f$ and add $e' = \lbrace a, d \rbrace$ and $f' = \lbrace c, d \rbrace$.
-	This way we produced a feasible solution.
-	
-	It remains to show that while decreasing the number of cycles of length $L$, we did not created any new cycles of length at least $L$.
-	Assume that adding $e'$ created a new cycle of length at least $L$.
-	However, $a$ and $d$ were already connected in $G$ by a directed path of length at least $2$, and a cycle strictly longer than $L$ existed in $G$.
-	
-	Assume that adding $f'$ created a new cycle $s^*$ of length $L' \geq L$.
-	Contrary to the previous case, the directed cycle from $e$ to $b$ might not exist in $G$.
-	However, this would mean that $b$ and $e$ were connected by a path of length $L'-1$.
-	This means that we might have followed this alternative path from $b$ to $e$ to obtain a cycle strictly longer than $L$ (cf. Figure~\ref{fig:cascade-illustration}).
-	
-\end{proof}
-
-
-\begin{theorem}
-	Consider a single repartition of DET2.
-	The number of clusters it involves is bounded by $k^k$.
-	\label{th:cascade}
-\end{theorem}
-
-\begin{proof}
-	Each node has degree at most $k$.
-	Every subset has flow conservation property, hence each cycle traverses one of the nodes of graph origin/core. (no subsets with just incoming edges to the origin part)
-	Combine with Theorem \ref{th:cascade-cycles}.
-	
-\end{proof}
-
-
-Corollary: Algorithm DET2 is $O(\ell \cdot k \cdot \min \{ \ell, k^k \})$-competitive.
+Note that for a single component merge, multiple migration graphs may exist (it
+depends on the choice of the algorithm), and multiple of them might have the optimal cost.
 
 \bibliographystyle{alpha}  
 \bibliography{references}  
