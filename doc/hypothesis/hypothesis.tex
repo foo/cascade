@@ -121,6 +121,7 @@ The input to the problem is revealed one-by-one, in online fashion. Upon seeing
 a request, the algorithm must serve it without the knowledge of future requests
 (although prior to serving the request, it can reconfigure the nodes).
 
+
 We measure
 the performance of an online algorithm by comparing to the performance of an optimal offline
 algorithm. Formally, let~$\ONL(\sigma)$, resp.~$\OPT(\sigma)$, be the cost
@@ -129,11 +130,12 @@ algorithm \OPT, for a given sequence of requests~$\sigma$. In contrast to \ONL, 
 it serves them, \OPT has complete knowledge of the entire request
 sequence~$\sigma$ \emph{ahead of~time}. The goal is to design online repartitioning
 algorithms that provide worst-case guarantees. In particular, $\ONL$ is said
-to be \emph{$\rho$-competitive} if for any
+to be \emph{$\rho$-competitive} if there is a constant $\beta$, such that for any
 input sequence~$\sigma$ it holds that
 \[
-    \ONL(\sigma) \leq \rho \cdot \OPT(\sigma).
+	\ONL(\sigma) \leq \rho \cdot \OPT(\sigma) + \beta.
 \]
+Note that $\beta$ cannot depend on input $\sigma$ but can depend on other
 parameters of the problem, such as the number of nodes or the number of clusters.
 The minimum $\rho$ for which $\ONL$ is $\rho$-competitive is called the 
 \emph{competitive ratio} of $\ONL$. 
@@ -306,6 +308,73 @@ A trivial upper bound on the cost is the size of the connected component in the 
 
 Note that for a single component merge, multiple migration graphs may exist (it
 depends on the choice of the algorithm), and multiple of them might have the optimal cost.
+
+
+\section{Tasks}
+
+The main task is to prove weak and strong cascade hypotheses or provide a
+counterexample.
+In this section we propose a number of programming tasks. Their main objective
+is to help understanding the problem. Moreover, the tools may be used to quickcheck 
+if the cascade graph has certain properties.
+
+
+\subsection{Minimum cost cascade.}
+
+We are given integers $k$, $\ell$, an initial configuration $C_I$ of clusters (the
+sizes of components in each cluster), and distinguished components $A$ and
+$B$ that are present in the initial configuration.
+We say that a configuration is feasible if each component is entirely contained
+in a single cluster (i.e., no component is split), and each cluster contains
+exactly $k$ nodes.
+
+The objective is to perform a merge operation of $A$ and $B$. Precisely,
+\begin{enumerate}
+    \item Determine if there exists a feasible configuration of clusters after
+        the merge.
+    \item Find a feasible configuration that is closest to $C_I$ (the number of
+        node migrations is minimized).
+    \item If multiple configurations with minimum cost exists, find all of them.
+\end{enumerate}
+
+\noindent
+\textbf{Implementation.}
+Use existing tools such as Mixed-Integer Programming solvers, CP-SAT solvers or
+other libraries, specialized in searching spaces of exponential size.
+Do not implement your own solutions unless justified.
+
+\noindent The solution must be exponential due to NP-completeness of $\ell$-way integer
+partition \cite{AndRae06}.
+\subsection{Unique minimum cost cascade.}
+Multiple min-cost cascades exists, and many of them may be isomorphic. Propose a
+simple rule to determine a unique cascade (e.g. the cascade with components of
+minimum index, where index is a component ID). The rule should be easy to
+express mathematically and easy to implement.
+
+\subsection{Cascade graph analysis.}
+
+Fix a cascade graph, and let $C_F$ be the final configuration.
+The \emph{core} vertices of the cascade graph are: the cluster that contains $A$
+in $C_I$, the cluster that contains $B$ in $C_I$, and the cluster that contains
+$A\cup B$ in $C_F$.
+
+Determine the following properties of the given cascade graph:
+\begin{enumerate}
+    \item the length of the longest simple cycle (i.e., without repeating
+        vertices)
+    \item existence of ears: vertices that do not belong to any simple cycle
+        that contains a core vertex
+\end{enumerate}
+
+\subsection{Generating initial configurations.}
+
+Automate graph analysis by generating feasible initial configurations.
+\begin{enumerate}
+    \item Use
+random feasible configurations.
+\item Enumerate over all possible non-isomorphic configurations for a given small $k$
+    and $\ell$
+\end{enumerate}
 
 \bibliographystyle{alpha}  
 \bibliography{references}  
