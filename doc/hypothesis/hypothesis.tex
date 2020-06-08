@@ -1,4 +1,4 @@
- \documentclass[a4paper,anonymous,USenglish]{lipics-v2019}
+ \documentclass[a4paper,USenglish]{lipics-v2019}
  
  \usepackage[utf8]{inputenc}
  \usepackage{xspace}
@@ -29,7 +29,7 @@
  
  \title{Cascade Hypothesis for Dynamic Balanced Graph Partitioning}
  \author{x}{y}{}{}{}
-
+ \authorrunning{Cascade Hypothesis}
 
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&&
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&&
@@ -360,20 +360,21 @@ $A\cup B$ in $C_F$.
 
 Determine the following properties of the given cascade graph:
 \begin{enumerate}
-    \item the length of the longest simple cycle (i.e., without repeating
-        vertices)
-    \item existence of ears: vertices that do not belong to any simple cycle
-        that contains a core vertex
+    \item The length of the longest simple cycle (i.e., without repeating
+        vertices).
+    \item Existence of ears: vertices that do not belong to any simple cycle
+        that contains a core vertex.
 \end{enumerate}
 
 \subsection{Generating initial configurations.}
 
-Automate graph analysis by generating feasible initial configurations.
+Automate graph analysis by generating feasible initial configurations. Two
+possible solutions:
 \begin{enumerate}
     \item Use
 random feasible configurations.
 \item Enumerate over all possible non-isomorphic configurations for a given small $k$
-    and $\ell$
+    and $\ell$.
 \end{enumerate}
 
 \bibliographystyle{alpha}  
