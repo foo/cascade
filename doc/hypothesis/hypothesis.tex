@@ -80,7 +80,7 @@
 
 \maketitle
 
-\section{Problem Definition of Dynamic Balanced Graph Partitioning}
+\section{Problem definition of Dynamic Balanced Graph Partitioning}
 
 
 \noindent
@@ -115,7 +115,7 @@ is~$\alpha \geq 1$, where $\alpha$ is a parameter (an~integer).
 The total cost of an algorithm \ALG, consisting of communication plus migration
 cost.
 
-\subsection{Online Algorithms and Competitive Analysis}
+\subsection{Online algorithms and competitive analysis}
 
 The input to the problem is revealed one-by-one, in online fashion. Upon seeing
 a request, the algorithm must serve it without the knowledge of future requests
@@ -167,15 +167,22 @@ nodes from different clusters, and thus entails a cost for \DET. For each edge
 between nodes $x$ and $y$, we define its weight~$w(x,y)$ to be the number of
 paid communication requests between $x$ and~$y$ since the beginning of~the~current phase.
 
-Whenever an edge weight reaches $\alpha$, it is called \emph{saturated}. If a
+Whenever an edge weight reaches $\alpha$, it is called \emph{saturated}.
+Throughout its execution, \DET maintains an invariant that saturated edges are inside clusters (i.e., two nodes of such edge are collocated). 
+From the perspective of node placement, this means that each node of a~connected component of saturated edges must be collocated in a single cluster.
+
+If a
 request causes the corresponding edge to~become saturated,
+we perform a \emph{reconfiguration} of nodes.
 \DET computes a new placement of nodes (potentially for all of them), so that all
-saturated edges are inside clusters (there is only one new saturated edge).
-Among all possible placements, \DET chooses the closest to the current
-configuration. If finding such placement
+saturated edges are inside clusters.
+If finding such placement
 is not possible, node positions are not changed, the~current phase ends
-with the current request, and a new phase begins with the next request. Note
-that all edge weights are reset to zero at the beginning of a phase.
+with the current request, and a new phase begins with the next request.
+Among all possible placements, \DET chooses the closest to the current
+configuration. 
+
+Note that there is only one new saturated edge at a~time, and all edge weights are reset to zero at the beginning of a phase.
 
 
 \begin{theorem}
@@ -223,22 +230,50 @@ $\DET(\sigma) \leq O(k^2 \cdot \ell^2) \cdot \OPT(\sigma) + O(k^2 \cdot
 \ell^2 \cdot \alpha)$ for any input $\sigma$.
 \end{proof}
 
+\section{The cascade hypothesis.}
 
-\section{The Cascade Hypothesis.}
+Upon receiving a request, an edge may become saturated, 
+and \DET may perform a reconfiguration of its nodes.
+The cascade hypothesis aims to bound the cost of a single reconfiguration performed by \DET.
 
-Upon receiving a request, \DET may merge two of its components and consequently perform a
-reconfiguration of its nodes.
-The cascade hypothesis aims to bound the cost of such reconfiguration.
+\subsection{The cascade.}
 
-In \cite{repartition-disc}, authors trivially bounded the reconfiguration cost
-for each merge action by $k \cdot \ell$ (the proof is given also in this
+Consider an edge saturation event that triggers a reconfiguration from a configuration $C_I$ to a configuration $C_F$.
+Prior to the event, the two nodes $u,v$ of the new saturated edge were located in different clusters --- only paid requests increase the counter.
+\DET collocates $u$ and $v$ in a single cluster, e.g. it may migrate $u$ to $v$'s cluster or migrate both $u$ and $v$ to a common cluster.
+
+To collocate $u$ and $v$, we may need to additionally migrate other nodes.
+This is due to the limited capacity of clusters, and also to keep saturated edges inside clusters.
+    
+The partition must be balanced at all times: each cluster must contain exactly $k$ nodes. If we migrate a single node $u$ from a cluster $A$ to a cluster $B$, we must (1) migrate another node to fill the place of $u$ in $A$, and (2) evict a node from $B$ to another cluster.
+
+\DET keeps saturated edges inside clusters, hence a migration of a single node may entail migrations of other nodes.
+If the migrated node $u$ is already connected with a saturated edge with another node $u'$, we must migrate both of them. In turn, $u'$ may have a saturated edge to yet another node. Precisely, to maintain the invariant, we must migrate nodes in groups that correspond to connected components in the graph of saturated edges.
+
+We refer to the set of nodes inside a connected component in the graph of saturated edges as \emph{component}.
+A saturation of an edge \emph{merges} two components.
+Components are unsplittable --- their nodes must be collocated.
+In each reconfiguration we must assure that each cluster contains exactly $k$ nodes, and to satisfy this condition, \DET may move multiple components between clusters.
+
+
+\subsection{Bounding the repartition cost.}
+
+In \cite{repartition-disc}, authors trivially bounded the cost of a single reconfiguration 
+of \DET
+by
+$k \cdot \ell$ (the proof is given also in this
 manuscript in Theorem~\ref{th:detsqare}).
-This roughly corresponds to migrating every node in every cluster.
-In \cite{disc2020}, authors significantly improved the analysis of \DET for
-unsaturated edges (that in principle incur the cost $O(k^2\cdot \ell^2)$).
-This allows to bound the ratio by $O(k\cdot \ell \cdot f(k, \ell))$, where $f(k,
+This roughly corresponds to migrating every node in every cluster, and possibly can be improved.
+
+In \cite{disc2020}, the authors improved the analysis of \DET for
+unsaturated edges (that may incur the cost $O(k^2\cdot \ell^2)$).
+Precisely, the improved competitive ratio is $O(k\cdot \ell \cdot f(k, \ell))$, where $f(k,
 \ell)$ is a bound on the cost of a single repartition.
-The best known lower bound is $\Omega(k\cdot \ell)$ \cite{disc2020}.
+
+
+The best known lower bound for a competitive ratio of any deterministic algorithm is $\Omega(k\cdot \ell)$ \cite{disc2020}.
+The best lower bound for a cost of a single repartition is $\Omega(k^3)$.
+\maciek{Note to myself: show the $\Omega(k^3)$ costly reconfiguration example}
 
 \medskip
 
@@ -251,7 +286,7 @@ reconfiguration of \DET can be bounded by $f$ that does not depend on $\ell$.
 
 \begin{hypothesis}
     \textbf{Weak cascade hypothesis.}
-The cost of a single reconfiguraton of \DET can be bounded by $f$ that is $o(\ell)$ (i.e., the dependency on $\ell$ is
+The cost of a single reconfiguration of \DET can be bounded by $f$ that is $o(\ell)$ (i.e., the dependency on $\ell$ is
 sublinear).
 \end{hypothesis}
 
@@ -259,14 +294,8 @@ In both hypotheses, the cost of reconfiguration may be exponential in $k$.
 One can think that $k$ is usually small in comparison to $\ell$.
 
 
-\subsection{Characterization of the migration graph}
+\subsection{Characterization of the migration graph.}
 
-Consider a single component merge action performed by \TAlg that triggers a reconfiguration from a configuration $C_I$ to a configuration $C_F$.
-To perform the reconfiguration, the nodes of two non-collocated components migrate to a common cluster.
-Each cluster contains exactly $k$ nodes, thus other nodes migrate to take the place of nodes of merged components.
-The place they leave must be filled by other nodes, thus a single merge action may trigger migrations in clusters not directly involved in a merge action. 
-Both $C_I$ and $C_F$ are component-respecting configurations (i.e., saturated
-edges are kept inside clusters), hence a migration of a single node entails migrations of all nodes of its cluster.
 
 To help analyzing the cost of a reconfiguration, we introduce a \emph{migration graph} that models the reconfiguration.
 In the following, we characterize the structure of the migration graph.
@@ -310,7 +339,7 @@ Note that for a single component merge, multiple migration graphs may exist (it
 depends on the choice of the algorithm), and multiple of them might have the optimal cost.
 
 
-\section{Tasks}
+\section{Tasks.}
 
 The main task is to prove weak and strong cascade hypotheses or provide a
 counterexample.
