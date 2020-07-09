@@ -342,6 +342,21 @@ A trivial upper bound on the cost is the size of the connected component in the 
 Note that for a single component merge, multiple migration graphs may exist (it
 depends on the choice of the algorithm), and multiple of them might have the optimal cost.
 
+\subsubsection{Rules of the cascade graph optimality}
+
+Flow conservation and degree bounds are the properties of each feasible cascade.
+An optimal-cost cascade must have additional properties:
+\begin{enumerate}
+    \item Shortcutting the intermediate set \maciek{todo}
+    \item Shortcutting the cycles \maciek{Is it an instance of the previous one?}
+\end{enumerate}
+
+\subsubsection{Cascade graph with full information}
+
+Additional information: for each vertex we have the multiset of its component sizes in its label.
+
+ToDo: search for additional rules that actually imply that each cascade graph with these properties is always the minimum cost reconfiguration.
+
 \section{Tasks}
 
 \subsection{Whiteboard tasks --- Various upper and lower bounds on the cascade.}
@@ -378,6 +393,10 @@ Show a cascade example where $\log(k)$ different components of sizes $1, 2, \ldo
 
 
 Show an example of a cascade, where exists a vertex reachable from a core vertex that is not on any simple path (i.e., without repeating vertices) between core vertices.
+
+\subsection{Cascade graph example with no 2-edge cycles}
+
+Show an example of a cascade graph, where each non-core vertex participates only in cycles of length $3$ or more.
 
 
 \subsection{Programming tasks.}
