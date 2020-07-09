@@ -293,6 +293,10 @@ sublinear).
 In both hypotheses, the cost of reconfiguration may be exponential in $k$.
 One can think that $k$ is usually small in comparison to $\ell$.
 
+The task is to prove weak and strong cascade hypotheses or provide a
+counterexample.
+
+
 
 \subsection{Characterization of the migration graph.}
 
@@ -338,17 +342,51 @@ A trivial upper bound on the cost is the size of the connected component in the 
 Note that for a single component merge, multiple migration graphs may exist (it
 depends on the choice of the algorithm), and multiple of them might have the optimal cost.
 
+\section{Tasks}
 
-\section{Tasks.}
+\subsection{Whiteboard tasks --- Various upper and lower bounds on the cascade.}
 
-The main task is to prove weak and strong cascade hypotheses or provide a
-counterexample.
+\maciek{Warning, this section is under construction. Read on your own risk.}
+
+Basic definitions.
+Cascade example is an initial configuration of components and a new saturated edge.
+We'll search for cascade examples with certain property $P$ of its cascade graphs.
+To claim that a cascade example have the property $P$, we must prove it for each minimum cascade graph that leads to a component-respecting partition after saturation.
+
+\subsubsection{Migrate as many singletons as possible}
+
+Show a cascade example with $g(k,l)$ singletons migrating, for as large $g$ as possible (asymptotically).
+
+\subsubsection{The maximum number of migrating singletons.}
+
+Show an upper bound $h(k,l)$ on the number of singletons that can migrate in any cascade.
+
+\subsubsection{Examples for larger components }
+
+Let $S$ be any of $\{ \Theta(\log(k)), \Theta(\sqrt(k)), \Theta(k)\}$.
+Show a cascade example with $g(k,l)$ components of size $S$ migrating.
+Show an upper bound $h(k,l)$ on the number of components of size $S$ that can migrate in any cascade.
+
+\subsection{Migrate all sizes of components}
+
+Show a cascade example where all component sizes ($\{1,2, \ldots, k\}$) migrate.
+Show a cascade example where $2$ different components of sizes $1$ and $2$ and $3,\ldots k$ migrate.
+
+Show a cascade example where $\log(k)$ different components of sizes $1, 2, \ldots, \log(k)$ migrate.
+
+\subsubsection{Paths, cycles and ears}
+
+
+Show an example of a cascade, where exists a vertex reachable from a core vertex that is not on any simple path (i.e., without repeating vertices) between core vertices.
+
+
+\subsection{Programming tasks.}
 In this section we propose a number of programming tasks. Their main objective
 is to help understanding the problem. Moreover, the tools may be used to quickcheck 
 if the cascade graph has certain properties.
 
 
-\subsection{Minimum cost cascade.}
+\subsubsection{Minimum cost cascade.}
 
 We are given integers $k$, $\ell$, an initial configuration $C_I$ of clusters (the
 sizes of components in each cluster), and distinguished components $A$ and
@@ -380,7 +418,7 @@ simple rule to determine a unique cascade (e.g. the cascade with components of
 minimum index, where index is a component ID). The rule should be easy to
 express mathematically and easy to implement.
 
-\subsection{Cascade graph analysis.}
+\subsubsection{Cascade graph analysis.}
 
 Fix a cascade graph, and let $C_F$ be the final configuration.
 The \emph{core} vertices of the cascade graph are: the cluster that contains $A$
@@ -395,7 +433,7 @@ Determine the following properties of the given cascade graph:
         that contains a core vertex.
 \end{enumerate}
 
-\subsection{Generating initial configurations.}
+\subsubsection{Generating initial configurations.}
 
 Automate graph analysis. Generate feasible initial configurations and the
 merged pair of components $A$ and $B$. Two
