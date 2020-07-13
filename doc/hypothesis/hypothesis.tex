@@ -54,6 +54,7 @@
  
  
  
+ \newtheorem{task}{Task}
  \newtheorem{fact}{Fact}
  \newtheorem{hypothesis}{Hypothesis}
  \newtheorem{rem}{Remark}
@@ -361,54 +362,53 @@ ToDo: search for additional rules that actually imply that each cascade graph wi
 
 \subsection{Whiteboard tasks --- Various upper and lower bounds on the cascade.}
 
-\maciek{Warning, this section is under construction. Read on your own risk.}
 
-Basic definitions.
 Cascade example is an initial configuration of components and a new saturated edge.
 We'll search for cascade examples with certain property $P$ of its cascade graphs.
-To claim that a cascade example have the property $P$, we must prove it for each minimum cascade graph that leads to a component-respecting partition after saturation.
+To claim that a cascade example have the property $P$, we must prove $P$ for each minimum cascade graph that leads to a component-respecting partition after saturation.
 
-\subsubsection{Migrate as many singletons as possible}
-
+\begin{task}[Migrate as many singletons as possible]
 Show a cascade example with $g(k,l)$ singletons migrating, for as large $g$ as possible (asymptotically).
+\end{task}
 
-\subsubsection{The maximum number of migrating singletons.}
 
+\begin{task}[The maximum number of migrating singletons.]
 Show an upper bound $h(k,l)$ on the number of singletons that can migrate in any cascade.
+\end{task}
 
-\subsubsection{Examples for larger components }
-
+\begin{task}[Examples for larger components.]
 Let $S$ be any of $\{ \Theta(\log(k)), \Theta(\sqrt(k)), \Theta(k)\}$.
 Show a cascade example with $g(k,l)$ components of size $S$ migrating.
 Show an upper bound $h(k,l)$ on the number of components of size $S$ that can migrate in any cascade.
+\end{task}
 
-\subsection{Cascade dependency on component sizes}
+\begin{task}[Cascade dependency on component sizes.]
+Assume all components are of size at most $s$.
+Show an upper bound $h(k,l,s)$ on the cost of cascade.
+\end{task}
 
-\maciek{Assume all components are of size $s$ at most?}
-
-Let any component C be of size |C| <= s. Find the smallest function h(s) so that : for all cascade c, Cost(c) < h(s)
-
-\subsection{Cascade dependency on number of saturated edges}
+\begin{task}[Cascade dependency on number of saturated edges.]
 
 Let $s$ be a number of saturated edges.
 Find the smallest $h(s)$ that bounds the cost of cascade.
+\end{task}
 
-\subsection{Migrate all sizes of components}
+\begin{task}[Migrate all sizes of components.]
 
 Show a cascade example where all component sizes ($\{1,2, \ldots, k\}$) migrate.
 Show a cascade example where $2$ different components of sizes $1$ and $2$ and $3,\ldots k$ migrate.
 
 Show a cascade example where $\log(k)$ different components of sizes $1, 2, \ldots, \log(k)$ migrate.
+\end{task}
 
-\subsubsection{Paths, cycles and ears}
-
-
+\begin{task}[Paths, cycles and ears.]
 Show an example of a cascade, where exists a vertex reachable from a core vertex that is not on any simple path (i.e., without repeating vertices) between core vertices.
+\end{task}
 
-\subsection{Cascade graph example with no 2-edge cycles}
+\begin{task}[Cascade graph example with no 2-edge cycles.]
 
 Show an example of a cascade graph, where each non-core vertex participates only in cycles of length $3$ or more.
-
+\end{task}
 
 \subsection{Programming tasks.}
 In this section we propose a number of programming tasks. Their main objective
@@ -416,7 +416,7 @@ is to help understanding the problem. Moreover, the tools may be used to quickch
 if the cascade graph has certain properties.
 
 
-\subsubsection{Minimum cost cascade.}
+\begin{task}[Minimum cost cascade.]
 
 We are given integers $k$, $\ell$, an initial configuration $C_I$ of clusters (the
 sizes of components in each cluster), and distinguished components $A$ and
@@ -447,8 +447,9 @@ Multiple min-cost cascades exists, and many of them may be isomorphic. Propose a
 simple rule to determine a unique cascade (e.g. the cascade with components of
 minimum index, where index is a component ID). The rule should be easy to
 express mathematically and easy to implement.
+\end{task}
 
-\subsubsection{Cascade graph analysis.}
+\begin{task}[Cascade graph analysis.]
 
 Fix a cascade graph, and let $C_F$ be the final configuration.
 The \emph{core} vertices of the cascade graph are: the cluster that contains $A$
@@ -463,7 +464,9 @@ Determine the following properties of the given cascade graph:
         that contains a core vertex.
 \end{enumerate}
 
-\subsubsection{Generating initial configurations.}
+\end{task}
+
+\begin{task}[Generating initial configurations.]
 
 Automate graph analysis. Generate feasible initial configurations and the
 merged pair of components $A$ and $B$. Two
@@ -474,6 +477,7 @@ random feasible configurations.
 \item Enumerate over all possible non-isomorphic configurations for a given small $k$
     and $\ell$.
 \end{enumerate}
+\end{task}
 
 \bibliographystyle{alpha}  
 \bibliography{references}  
