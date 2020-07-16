@@ -15,8 +15,10 @@ class Graph:
 
     def __init__(self, graph_address):
         file_object = open(graph_address, 'r')
-        self.k = int(file_object.readline())
-        self.l = int(file_object.readline())
+        self.k = sum(list(map(int, file_object.readline().split(" "))))
+        file_object.seek(0)
+        self.l = len(open(graph_address).readlines())
+        file_object.seek(0)
         self.cluster_list = []
 
         counter.Counter.reset()
@@ -27,12 +29,14 @@ class Graph:
     # new_graph is a string representation of the graph
     def actualisation(self, new_graph):
         new_graph_split = new_graph.split('\n')
-        if int(new_graph_split[0]) != self.k or int(new_graph_split[1]) != self.l:
-            print("k or l values are not as expected")
+        l_new = len(new_graph_split)
+        k_new = sum(list(map(int, new_graph_split[0].split(" "))))
+        if k_new != self.k or l_new != self.l:
+            print("k or l values are not as expected: no graph actualisation")
         else:
             counter.Counter.reset()
             for i in range(len(self.cluster_list)):
-                self.cluster_list[i].actualisation(new_graph_split[i + 2])
+                self.cluster_list[i].actualisation(new_graph_split[i])
 
     # return a list of binaries, that describes where is located every component
     def belonging_array(self, id1, id2):
@@ -57,8 +61,7 @@ class Graph:
         return belonging_array, sizes, ids, index1, index2
 
     def to_string(self):
-        tmp = str(self.k) + "\n"
-        tmp += str(self.l) + "\n"
+        tmp = ""
         for c in self.cluster_list:
             tmp += c.to_string() + "\n"
         return tmp

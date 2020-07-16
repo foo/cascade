@@ -4,7 +4,6 @@ from pathlib import Path
 
 
 graph_file_address = Path(__file__).parent / "../evaluation/graph_test2.txt"
-#graph_file_address = "../evaluation/graph_test.txt"
 component1 = 0
 component2 = 15
 

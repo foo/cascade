@@ -43,10 +43,9 @@ class Calculation:
         else:
 
             size_merged_comp = sizes[index1] + sizes[index2]
-            new_graph = str(k) + "\n" + str(l)
             is_merged_comp_treated = False
+            new_graph = ""
             for i in range(l):
-                new_graph += "\n"
                 for j in range(m):
                     if int(sizes[j] * xs[j, i].varValue) != 0:
                         if j == index1 or j == index2:
@@ -56,4 +55,6 @@ class Calculation:
                         else:
                             new_graph += str(int(sizes[j] * xs[j, i].varValue)) + " "
                 new_graph = new_graph[:len(new_graph) - 1]
+                new_graph += '\n'
+            new_graph = new_graph[:len(new_graph) - 1]
             return new_graph, p.value(Lp_prob.objective)
