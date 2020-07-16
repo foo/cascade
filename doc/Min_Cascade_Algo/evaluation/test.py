@@ -1,10 +1,19 @@
 from representation import graph
 from algos import cascade_calculation
+from pathlib import Path
 
 
-graph_file_address = "./evaluation/graph_test.txt"
+graph_file_address = Path(__file__).parent / "../evaluation/graph_test.txt"
+#graph_file_address = "../evaluation/graph_test.txt"
 component1 = 1
 component2 = 3
+
+#to do : no more k and l in graph files, put a symbol in a line to say "take the previous number and add it until we reach k"
+        #no reduction in number of components, add the condition X_id1_j == X_id2_j
+        #implement visualisation of the clusters
+        #1^17 = seventeen times the component 1
+        #compute the cascade graph
+        #in git, move it in cascade/src
 
 
 g = graph.Graph(graph_file_address)
@@ -14,6 +23,6 @@ print("number of moves: ", nb_moves)
 print(g.to_string())
 
 #g = graph.Graph(graph_file_address)
-#g_prime = g.copy()
+#g_prime = copy.deepcopy(g)
 #del g
 #print(g_prime.to_string())
