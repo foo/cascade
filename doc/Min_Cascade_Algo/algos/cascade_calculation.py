@@ -58,9 +58,6 @@ class Calculation:
             print("No feasible solution")
             return ""
         else:
-            varsdict = {}
-            for v in Lp_prob.variables():
-                varsdict[v.name] = v.varValue
 
             new_graph = str(k) + "\n" + str(l)
             for i in range(l):
@@ -70,7 +67,7 @@ class Calculation:
                         new_graph += str(int(reduced_sizes[j] * xs[j,i].varValue)) + " "
                 new_graph = new_graph[:len(new_graph)-1]
                     #new_graph += str(int(Lp_prob.variables()[j * l + i].varValue)) + " "
-            return new_graph
+            return new_graph, p.value(Lp_prob.objective)
 
 
 

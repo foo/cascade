@@ -1,5 +1,5 @@
-from reprentation import component
-from reprentation import counter
+from representation import component
+from representation import counter
 
 
 class Cluster:
@@ -49,4 +49,5 @@ class Cluster:
         tmp = ""
         for c in self.comp_list:
             tmp += c.to_string() + " "
+        tmp = tmp[:len(tmp)-1]
         return tmp

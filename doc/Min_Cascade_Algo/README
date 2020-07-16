@@ -1,0 +1,28 @@
+
+REQUIRED LIBRARIES ---------------------------------------------------------------------
+You must have pulp, numpy and random
+
+GRAPH REPRESENTATION -------------------------------------------------------------------
+the graphes are represented with strings as follows:
+    - 1st line is k, capacity of each clusters
+    - 2nd line is l, number of clusters
+    - then each line represent a cluster. Each integer on this line is the size of a component that is contained in the cluster
+
+for exemple, the graph:
+    1st cluster : components of sizes 8 and 4
+    2nd cluster : components of sizes 8 and 4
+    3rd cluster : twelve components of sizes 1
+has this representation:
+12
+3
+4 8
+4 8
+1 1 1 1 1 1 1 1 1 1 1 1
+
+HOW TO RUN IT -------------------------------------------------------------------------------
+run evaluation/test.py
+before that, you can change the inputs:
+    - to indicate on what graph should the algo work, give graph_file_address the address of a graph with the above conventions
+    - to indicate what components must merge together, give to component1 and component2 the indexes of the components who must merge.
+      How do we find the index ? From left to right, from above to below, count the components starting from 0.
+      For exemple on the graph above, the 4 on the 1st cluster has index 0, the 8 on the 2nd cluster has index 3

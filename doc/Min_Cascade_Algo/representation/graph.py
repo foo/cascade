@@ -1,4 +1,4 @@
-from reprentation import cluster, counter
+from representation import cluster, counter
 import numpy as np
 
 
@@ -24,21 +24,15 @@ class Graph:
             tmp = file_object.readline()
             self.cluster_list.append(cluster.Cluster(self.k, i, list(map(int, tmp.split(" ")))))
 
-    #new_graph is a string representation of the graph
+    # new_graph is a string representation of the graph
     def actualisation(self, new_graph):
         new_graph_split = new_graph.split('\n')
-        if int(new_graph_split[0]) != self.k or int(new_graph_split[1]) != self.l :
+        if int(new_graph_split[0]) != self.k or int(new_graph_split[1]) != self.l:
             print("k or l values are not as expected")
         else:
             counter.Counter.reset()
             for i in range(len(self.cluster_list)):
-                self.cluster_list[i].actualisation(new_graph_split[i+2])
-
-
-
-
-
-
+                self.cluster_list[i].actualisation(new_graph_split[i + 2])
 
     # return a list of binaries, that describes where is located every component
     def belonging_array(self, id1, id2):
@@ -62,11 +56,9 @@ class Graph:
                 counter += 1
         return belonging_array, sizes, ids, index1, index2
 
-
-
     def to_string(self):
-        tmp = "k = " + str(self.k) + "\n"
-        tmp += "l = " + str(self.l) + "\n"
+        tmp = str(self.k) + "\n"
+        tmp += str(self.l) + "\n"
         for c in self.cluster_list:
             tmp += c.to_string() + "\n"
         return tmp
