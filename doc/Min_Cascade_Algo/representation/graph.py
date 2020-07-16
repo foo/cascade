@@ -1,21 +1,19 @@
 from representation import cluster, counter
 import numpy as np
-
+import re
 
 class Graph:
 
-    def __init__(self, k, l):
-        self.k = k
-        self.l = l
-        self.cluster_list = []
-
-        counter.Counter.reset()
-        for i in range(self.l):
-            self.cluster_list.append(cluster.Cluster(self.k, i))
-
     def __init__(self, graph_address):
-        file_object = open(graph_address, 'r')
-        self.k = sum(list(map(int, file_object.readline().split(" "))))
+
+        self.comps_to_merged = []
+        self.merge_char = '*'
+        self.power_char = '^'
+
+        file_object = open(graph_address, 'r+')
+        graph_lines = self.transcription(file_object)
+
+        self.k = sum(list(map(int, graph_lines[0].replace(self.merge_char, "").split(" "))))
         file_object.seek(0)
         self.l = len(open(graph_address).readlines())
         file_object.seek(0)
@@ -23,14 +21,13 @@ class Graph:
 
         counter.Counter.reset()
         for i in range(self.l):
-            tmp = file_object.readline()
-            self.cluster_list.append(cluster.Cluster(self.k, i, list(map(int, tmp.split(" ")))))
+            self.cluster_list.append(cluster.Cluster(self.k, i, list(map(int, graph_lines[i].split(" ")))))
 
     # new_graph is a string representation of the graph
     def actualisation(self, new_graph):
         new_graph_split = new_graph.split('\n')
         l_new = len(new_graph_split)
-        k_new = sum(list(map(int, new_graph_split[0].split(" "))))
+        k_new = sum(list(map(int, new_graph_split[0].replace(self.merge_char, "").split(" "))))
         if k_new != self.k or l_new != self.l:
             print("k or l values are not as expected: no graph actualisation")
         else:
@@ -65,6 +62,27 @@ class Graph:
         for c in self.cluster_list:
             tmp += c.to_string() + "\n"
         return tmp
+
+    def transcription(self, file_object):
+
+        lines = file_object.read().split("\n")
+        for i in range(len(lines)):
+            line_split = lines[i].split(" ")
+            for j in range(len(line_split)):
+                if self.power_char in line_split[j]:
+                    tmp = line_split[j].split(self.power_char)
+                    if len(tmp) != 2:
+                        print("Bad format concerning power char : ", self.power_char)
+                        return
+                    new_string = ""
+                    for m in range(int(tmp[1])):
+                        new_string += tmp[0] + " "
+                    new_string = new_string[:len(new_string) - 1]
+                    line_split[j] = new_string
+            lines[i] = " ".join(line_split)
+        return lines
+
+
 
     def comp_number(self):
         tmp = 0

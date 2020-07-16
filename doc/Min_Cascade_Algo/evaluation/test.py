@@ -3,9 +3,9 @@ from algos import cascade_calculation
 from pathlib import Path
 
 
-graph_file_address = Path(__file__).parent / "../evaluation/graph_test2.txt"
-component1 = 0
-component2 = 15
+graph_file_address = Path(__file__).parent / "../evaluation/graph_test.txt"
+component1 = 1
+component2 = 3
 
 #to do : no more k and l in graph files, put a symbol in a line to say "take the previous number and add it until we reach k"
         #no reduction in number of components, add the condition X_id1_j == X_id2_j
