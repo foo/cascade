@@ -3,7 +3,7 @@ from algos import cascade_calculation
 from pathlib import Path
 
 
-graph_file_address = Path(__file__).parent / "../evaluation/graph_test.txt"
+graph_file_address = Path(__file__).parent / "./evaluation/graph_test.txt"
 #to do:
         #implement visualisation of the clusters
         #compute the cascade graph
