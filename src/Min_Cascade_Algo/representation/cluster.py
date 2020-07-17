@@ -1,26 +1,36 @@
-from representation import component
-from representation import counter
+from representation import component, graph, counter
 
 
 class Cluster:
 
     # default constructor with all components sizes at 1
-    def __init__(self, k, id):
+    def __init__(self, k, id, g):
+        self.g = g
         self.comp_list = []
         self.id = id
         self.k = k
         for i in range(k):
             self.comp_list.append(component.Component(1, counter.Counter.get_component_id()))
 
-    def __init__(self, k, id, size_list):
+    def __init__(self, k, id, size_string, g):
+        size_list = size_string.split(" ")
+        self.g = g
         self.comp_list = []
         self.id = id
         self.k = k
-        if k != sum(size_list):
+
+        tmp_counter = 0
+        for i in range(len(size_list)):
+            comp_id = counter.Counter.get_component_id()
+            if g.merge_char in size_list[i]:
+                g.add_comp_to_merge(comp_id)
+                size_list[i] = size_list[i].replace(g.merge_char, "")
+            self.comp_list.append(component.Component(int(size_list[i]), comp_id))
+            tmp_counter += int(size_list[i])
+
+        if k != tmp_counter:
             print("Cluster n ", id, " was initialized with wrong components sizes")
             return
-        for i in range(len(size_list)):
-            self.comp_list.append(component.Component(size_list[i], counter.Counter.get_component_id()))
 
 
     def actualisation(self, new_cluster):

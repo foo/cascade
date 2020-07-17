@@ -6,9 +6,10 @@ class Calculation:
 
     # G is the graph, id1 and id2 are the two component ids to be merged
     @classmethod
-    def possible_cascade(cls, g, id1, id2):
+    def possible_cascade(cls, g):
         k = g.k
         l = g.l
+        id1, id2 = g.comps_to_merge[0], g.comps_to_merge[1]
         Lp_prob = p.LpProblem('cascade', p.LpMinimize)
         belonging_array, sizes, ids, index1, index2 = g.belonging_array(id1, id2)
         m = len(sizes)

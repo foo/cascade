@@ -6,20 +6,23 @@ GRAPH REPRESENTATION -----------------------------------------------------------
 the graphes are represented with strings as follows:
     - each line represent a cluster. Each integer on this line is the size of a component that is contained in the cluster
     - n and m integers, n^m means that components of size n are repeated m times
+    - to indicate what components should be merged, put a '*' right after the 2 components to be merged
 
 for exemple, the graph:
     1st cluster : components of sizes 8 and 4
     2nd cluster : components of sizes 8 and 4
     3rd cluster : twelve components of sizes 1
+    Merge the 4 in 1st and 2nd components
 has this representation:
-4 8
-4 8
+4* 8
+4* 8
 1^12
 
 HOW TO RUN IT -------------------------------------------------------------------------------
-run evaluation/test.py
-before that, you can change the inputs:
-    - to indicate on what graph should the algo work, give graph_file_address the address of a graph with the above conventions
-    - to indicate what components must merge together, give to component1 and component2 the indexes of the components who must merge.
+run: python -m evaluation.test.py
+before that, you can change the inputs by changing the variable graph_file_address. It must be the address of a text file organised as shown above
+
+HOW ARE COMPONENTS INDEXED ? ----------------------------------------------------------------
+    - to indicate what components must merge together, the algo give every components an index (= id).
       How do we find the index ? From left to right, from above to below, count the components starting from 0.
       For exemple on the graph above, the 4 on the 1st cluster has index 0, the 8 on the 2nd cluster has index 3

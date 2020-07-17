@@ -6,12 +6,14 @@ class Graph:
 
     def __init__(self, graph_address):
 
-        self.comps_to_merged = []
+        self.comps_to_merge = []
         self.merge_char = '*'
         self.power_char = '^'
 
         file_object = open(graph_address, 'r+')
         graph_lines = self.transcription(file_object)
+
+        print(graph_lines)
 
         self.k = sum(list(map(int, graph_lines[0].replace(self.merge_char, "").split(" "))))
         file_object.seek(0)
@@ -21,7 +23,7 @@ class Graph:
 
         counter.Counter.reset()
         for i in range(self.l):
-            self.cluster_list.append(cluster.Cluster(self.k, i, list(map(int, graph_lines[i].split(" ")))))
+            self.cluster_list.append(cluster.Cluster(self.k, i, graph_lines[i], self))
 
     # new_graph is a string representation of the graph
     def actualisation(self, new_graph):
@@ -69,6 +71,11 @@ class Graph:
         for i in range(len(lines)):
             line_split = lines[i].split(" ")
             for j in range(len(line_split)):
+                is_merge_char = False
+                if self.merge_char in line_split[j]:
+                    line_split[j] = line_split[j].replace(self.merge_char, "")
+                    is_merge_char = True
+
                 if self.power_char in line_split[j]:
                     tmp = line_split[j].split(self.power_char)
                     if len(tmp) != 2:
@@ -79,10 +86,17 @@ class Graph:
                         new_string += tmp[0] + " "
                     new_string = new_string[:len(new_string) - 1]
                     line_split[j] = new_string
+                if is_merge_char:
+                    line_split[j] += self.merge_char
             lines[i] = " ".join(line_split)
         return lines
 
 
+    def add_comp_to_merge(self, comp_id):
+        if len(self.comps_to_merge) >= 2:
+            print("More than two components to be merged are indicated. Only the first two are taken in account")
+            return
+        self.comps_to_merge.append(comp_id)
 
     def comp_number(self):
         tmp = 0
