@@ -1,24 +1,20 @@
 from representation import cluster, counter
 import numpy as np
-import re
 
 class Graph:
 
-    def __init__(self, graph_address):
+    def __init__(self, graph_string):
 
         self.comps_to_merge = []
         self.merge_char = '*'
         self.power_char = '^'
 
-        file_object = open(graph_address, 'r+')
-        graph_lines = self.transcription(file_object)
+        graph_lines = self.transcription(graph_string)
 
         print(graph_lines)
 
         self.k = sum(list(map(int, graph_lines[0].replace(self.merge_char, "").split(" "))))
-        file_object.seek(0)
-        self.l = len(open(graph_address).readlines())
-        file_object.seek(0)
+        self.l = len(graph_string.split("\n"))
         self.cluster_list = []
 
         counter.Counter.reset()
@@ -65,9 +61,27 @@ class Graph:
             tmp += c.to_string() + "\n"
         return tmp
 
-    def transcription(self, file_object):
+    def to_beautiful_string(self, thickness = 5, gap_btw_clusters = 2 ):
+        tmp_string = ""
+        tmp_array = []
+        for i in range(len(self.cluster_list)):
+            tmp_cluster_array = self.cluster_list[i].to_beautiful_string(thickness).split("\n")
+            if len(tmp_cluster_array) != self.k:
+                print("Error in the size of a cluster in his beautiful string representation")
+                return
+            tmp_array.append(tmp_cluster_array)
+        tmp_array = np.transpose(np.asarray(tmp_array))
+        for i in range(len(tmp_array)):
+            for j in range(len(tmp_array[i])):
+                tmp_string += " "*gap_btw_clusters + tmp_array[i, j]
+            tmp_string += '\n'
+        return tmp_string
 
-        lines = file_object.read().split("\n")
+
+
+    def transcription(self, graph_string):
+
+        lines = graph_string.split("\n")
         for i in range(len(lines)):
             line_split = lines[i].split(" ")
             for j in range(len(line_split)):

@@ -61,3 +61,10 @@ class Cluster:
             tmp += c.to_string() + " "
         tmp = tmp[:len(tmp)-1]
         return tmp
+
+    def to_beautiful_string(self, thickness):
+        tmp_string = ""
+        for i in range(len(self.comp_list)):
+            tmp_string += self.comp_list[i].to_beautiful_string(thickness) + '\n'
+        tmp_string = tmp_string[:len(tmp_string) - 1]
+        return tmp_string
