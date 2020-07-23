@@ -1,25 +1,109 @@
 from representation import cluster, counter
 import numpy as np
+import random as rd
 
 class Graph:
 
-    def __init__(self, graph_string):
-
+    def __init__(self, k, l):
+        self.k = k
+        self.l = l
         self.comps_to_merge = []
+        self.cluster_list = []
         self.merge_char = '*'
         self.power_char = '^'
 
-        graph_lines = self.transcription(graph_string)
+        for i in range(l):
+            self.cluster_list.append(cluster.Cluster(self.k, i, self))
 
-        print(graph_lines)
+    def next_request(self, choose_mod):
+        if choose_mod == "random":
+            comp_id_list = self.get_id_list()
+            # if len(comp_id_list) <=1 or len(comp_id_list[0])<=1:
+            #     print("too few components")
+            #     return
+            tmp1 = rd.choice(comp_id_list)
+            comp1 = rd.choice(tmp1)
+            comp_id_list.remove(tmp1)
+            tmp2 = rd.choice(comp_id_list)
+            comp2 = rd.choice(tmp2)
+            return [comp1, comp2]
 
-        self.k = sum(list(map(int, graph_lines[0].replace(self.merge_char, "").split(" "))))
-        self.l = len(graph_string.split("\n"))
-        self.cluster_list = []
+        if choose_mod == "smallest equal":
+            #the components in each clusters are supposed to be sorted
+            smallest_comp_list = []
+            for c in self.cluster_list:
+                c.reset_comp_counter()
+                smallest_comp_list.append(c.next_comp())
 
-        counter.Counter.reset()
-        for i in range(self.l):
-            self.cluster_list.append(cluster.Cluster(self.k, i, graph_lines[i], self))
+            if len(smallest_comp_list) < 2:
+                print("Only one cluster in Graph.next_request, choose_mod = smallest equal")
+            tmp_counter = self.comp_number()
+            while tmp_counter > 0:
+                sorted_comps = sorted(smallest_comp_list, key=lambda tup: tup[1])
+                smallest_comp = sorted_comps[0][1]
+                if sorted_comps[0][1] == sorted_comps[1][1]:
+                    return [sorted_comps[0][0], sorted_comps[1][0]]
+                else:
+                    for i in range(len(smallest_comp_list)):
+                        if smallest_comp_list[i][1] == smallest_comp:
+                            smallest_comp_list[i] = self.cluster_list[i].next_comp()
+                            break
+                tmp_counter -= 1
+
+            smallest_comp_list = []
+            for c in self.cluster_list:
+                c.reset_comp_counter()
+                smallest_comp_list.append(c.next_comp())
+            sorted_comps = sorted(smallest_comp_list, key=lambda tup: tup[1])
+            return [sorted_comps[0][0], sorted_comps[1][0]]
+
+    def two_smallest_identic(self):
+        smallest_comp_list = []
+        for c in self.cluster_list:
+            c.reset_comp_counter()
+            smallest_comp_list.append(c.next_comp())
+
+        if len(smallest_comp_list) < 2:
+            print("Only one cluster in Graph.next_request, choose_mod = smallest equal")
+        tmp_counter = self.comp_number()
+        while tmp_counter > 0:
+            sorted_comps = sorted(smallest_comp_list, key=lambda tup: tup[1])
+            smallest_comp = sorted_comps[0][1]
+            if sorted_comps[0][1] == sorted_comps[1][1]:
+                return [sorted_comps[0][0], sorted_comps[1][0]]
+            else:
+                for i in range(len(smallest_comp_list)):
+                    if smallest_comp_list[i][1] == smallest_comp:
+                        smallest_comp_list[i] = self.cluster_list[i].next_comp()
+                        break
+            tmp_counter -= 1
+
+        smallest_comp_list = []
+        for c in self.cluster_list:
+            c.reset_comp_counter()
+            smallest_comp_list.append(c.next_comp())
+        sorted_comps = sorted(smallest_comp_list, key=lambda tup: tup[1])
+        return [sorted_comps[0][0], sorted_comps[1][0]]
+
+
+
+    # def __init__(self, graph_string):
+    #
+    #     self.comps_to_merge = []
+    #     self.merge_char = '*'
+    #     self.power_char = '^'
+    #
+    #     graph_lines = self.transcription(graph_string)
+    #
+    #     print(graph_lines)
+    #
+    #     self.k = sum(list(map(int, graph_lines[0].replace(self.merge_char, "").split(" "))))
+    #     self.l = len(graph_string.split("\n"))
+    #     self.cluster_list = []
+    #
+    #     counter.Counter.reset()
+    #     for i in range(self.l):
+    #         self.cluster_list.append(cluster.Cluster(self.k, i, graph_lines[i], self))
 
     # new_graph is a string representation of the graph
     def actualisation(self, new_graph):
@@ -32,6 +116,7 @@ class Graph:
             counter.Counter.reset()
             for i in range(len(self.cluster_list)):
                 self.cluster_list[i].actualisation(new_graph_split[i])
+        self.comps_to_merge = []
 
     # return a list of binaries, that describes where is located every component
     def belonging_array(self, id1, id2):
@@ -116,6 +201,12 @@ class Graph:
         tmp = 0
         for c in self.cluster_list:
             tmp += c.comp_number()
+        return tmp
+
+    def get_id_list(self):
+        tmp = []
+        for c in self.cluster_list:
+            tmp.append(c.get_ids())
         return tmp
 
     # def saturation(self, ):

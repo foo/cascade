@@ -9,28 +9,31 @@ class Cluster:
         self.comp_list = []
         self.id = id
         self.k = k
+        self.comp_counter = 0
         for i in range(k):
             self.comp_list.append(component.Component(1, counter.Counter.get_component_id()))
 
-    def __init__(self, k, id, size_string, g):
-        size_list = size_string.split(" ")
-        self.g = g
-        self.comp_list = []
-        self.id = id
-        self.k = k
-
-        tmp_counter = 0
-        for i in range(len(size_list)):
-            comp_id = counter.Counter.get_component_id()
-            if g.merge_char in size_list[i]:
-                g.add_comp_to_merge(comp_id)
-                size_list[i] = size_list[i].replace(g.merge_char, "")
-            self.comp_list.append(component.Component(int(size_list[i]), comp_id))
-            tmp_counter += int(size_list[i])
-
-        if k != tmp_counter:
-            print("Cluster n ", id, " was initialized with wrong components sizes")
-            return
+    # def __init__(self, k, id, size_string, g):
+    #     size_list = size_string.split(" ")
+    #     self.g = g
+    #     self.comp_list = []
+    #     self.id = id
+    #     self.k = k
+    #
+    #     tmp_counter = 0
+    #     for i in range(len(size_list)):
+    #         comp_id = counter.Counter.get_component_id()
+    #         if g.merge_char in size_list[i]:
+    #             g.add_comp_to_merge(comp_id)
+    #             size_list[i] = size_list[i].replace(g.merge_char, "")
+    #         self.comp_list.append(component.Component(int(size_list[i]), comp_id))
+    #         tmp_counter += int(size_list[i])
+    #
+    #     if k != tmp_counter:
+    #         print("Cluster n ", id, " was initialized with wrong components sizes")
+    #         return
+    #
+    #     self.comp_list = sorted(self.comp_list, key=lambda comp: comp.size)
 
 
     def actualisation(self, new_cluster):
@@ -38,6 +41,7 @@ class Cluster:
         tmp = list(map(int, new_cluster.split(" ")))
         for i in range(len(tmp)):
             self.comp_list.append(component.Component(tmp[i], counter.Counter.get_component_id()))
+        self.comp_list = sorted(self.comp_list, key=lambda comp: comp.size)
 
 
     def get_ids(self):
@@ -54,6 +58,15 @@ class Cluster:
 
     def comp_number(self):
         return len(self.comp_list)
+
+    def next_comp(self):
+        if self.comp_counter < len(self.comp_list):
+            self.comp_counter += 1
+        return [ self.comp_list[self.comp_counter - 1].id, self.comp_list[self.comp_counter - 1].size ]
+
+    def reset_comp_counter(self):
+        self.comp_counter = 0
+        return
 
     def to_string(self):
         tmp = ""

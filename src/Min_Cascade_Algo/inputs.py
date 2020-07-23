@@ -1,41 +1,19 @@
-import random as rd
+import numpy as np
+import matplotlib.pyplot as plt
+
+X = np.asarray([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 20, 23, 25, 30, 40, 50, 100])
+Y_resuts = np.array([2, 6, 10, 18, 22, 30, 38, 46, 52, 60, 70, 84, 88, 94, 117, 144, 170, 190, 246, 368, 492, 1172])
+Y_comparison = 2 * X * np.log2(X)
+
+X_3D = np.asarray([2, 3, 4, 5, 6, 7, 8, 9, 10])
+Y_resuts_3D = np.asarray([4, 12, 19, 29, 40, 50, 58, 69, 84])
+Y_comparison_3D = 3 * X_3D * np.log2(X_3D)
 
 
-class Inputs:
-    alpha = 0
-    k = 0
-    l = 0
-    sequence = []
-    # the next request index that will be received
-    t = 0
-
-
-    @classmethod
-    def init(cls, k, l, alpha):
-        cls.k = k
-        cls.l = l
-        cls.alpha = alpha
-        cls.t = 0
-
-    # create a length-size random input sequence
-    @classmethod
-    def create_sequence(cls, length):
-        if cls.k * cls.l <= 1:
-            print("too few vertices")
-            return
-
-        for i in range(length):
-            tmp1 = rd.randint(0, cls.k * cls.l)
-            tmp2 = rd.randint(0, cls.k * cls.l)
-            while tmp2 ==tmp1:
-                tmp2 = rd.randint(0, cls.k * cls.l)
-            cls.sequence.append([tmp1, tmp2])
-
-    @classmethod
-    def next_request(cls):
-        if cls.t >= len(cls.sequence):
-            return []
-
-        cls.t += 1
-        return cls.sequence[cls.t-1]
-
+plt.plot(X, Y_resuts, label='max phase cost (biggest cost among 500 random phases)')
+plt.plot(X, Y_comparison, label="l.k.log2(k)")
+plt.title("L = 2")
+plt.xlabel("cluster capacity")
+plt.ylabel("phase costs")
+plt.legend(['max phase cost (biggest cost among 500 random phases)', 'l.k.log2(k)'], loc=4)
+plt.show()

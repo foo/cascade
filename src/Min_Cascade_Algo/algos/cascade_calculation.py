@@ -35,12 +35,11 @@ class Calculation:
         for i in range(l):
             Lp_prob += xs[index1, i] == xs[index2, i]
         # solving the problem
-        Lp_prob.solve()
+        p.PULP_CBC_CMD(msg=0).solve(Lp_prob)
 
         # Comunicating the results to create a new graph
         if Lp_prob.sol_status != 1:
-            print("No feasible solution")
-            return "", -1
+            return Lp_prob.sol_status, "", -1
         else:
 
             size_merged_comp = sizes[index1] + sizes[index2]
@@ -58,4 +57,4 @@ class Calculation:
                 new_graph = new_graph[:len(new_graph) - 1]
                 new_graph += '\n'
             new_graph = new_graph[:len(new_graph) - 1]
-            return new_graph, p.value(Lp_prob.objective)
+            return Lp_prob.sol_status, new_graph, p.value(Lp_prob.objective)
