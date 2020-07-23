@@ -1,19 +1,20 @@
-from representation import cluster, counter
+from representation import cluster, counter, cascade_changes
 import numpy as np
 import random as rd
 
+
 class Graph:
 
-    def __init__(self, k, l):
-        self.k = k
-        self.l = l
-        self.comps_to_merge = []
-        self.cluster_list = []
-        self.merge_char = '*'
-        self.power_char = '^'
-
-        for i in range(l):
-            self.cluster_list.append(cluster.Cluster(self.k, i, self))
+    # def __init__(self, k, l):
+    #     self.k = k
+    #     self.l = l
+    #     self.comps_to_merge = []
+    #     self.cluster_list = []
+    #     self.merge_char = '*'
+    #     self.power_char = '^'
+    #
+    #     for i in range(l):
+    #         self.cluster_list.append(cluster.Cluster(self.k, i, self))
 
     def next_request(self, choose_mod):
         if choose_mod == "random":
@@ -29,7 +30,7 @@ class Graph:
             return [comp1, comp2]
 
         if choose_mod == "smallest equal":
-            #the components in each clusters are supposed to be sorted
+            # the components in each clusters are supposed to be sorted
             smallest_comp_list = []
             for c in self.cluster_list:
                 c.reset_comp_counter()
@@ -85,45 +86,58 @@ class Graph:
         sorted_comps = sorted(smallest_comp_list, key=lambda tup: tup[1])
         return [sorted_comps[0][0], sorted_comps[1][0]]
 
+    def __init__(self, graph_string):
 
-
-    # def __init__(self, graph_string):
-    #
-    #     self.comps_to_merge = []
-    #     self.merge_char = '*'
-    #     self.power_char = '^'
-    #
-    #     graph_lines = self.transcription(graph_string)
-    #
-    #     print(graph_lines)
-    #
-    #     self.k = sum(list(map(int, graph_lines[0].replace(self.merge_char, "").split(" "))))
-    #     self.l = len(graph_string.split("\n"))
-    #     self.cluster_list = []
-    #
-    #     counter.Counter.reset()
-    #     for i in range(self.l):
-    #         self.cluster_list.append(cluster.Cluster(self.k, i, graph_lines[i], self))
-
-    # new_graph is a string representation of the graph
-    def actualisation(self, new_graph):
-        new_graph_split = new_graph.split('\n')
-        l_new = len(new_graph_split)
-        k_new = sum(list(map(int, new_graph_split[0].replace(self.merge_char, "").split(" "))))
-        if k_new != self.k or l_new != self.l:
-            print("k or l values are not as expected: no graph actualisation")
-        else:
-            counter.Counter.reset()
-            for i in range(len(self.cluster_list)):
-                self.cluster_list[i].actualisation(new_graph_split[i])
         self.comps_to_merge = []
+        self.merge_char = '*'
+        self.power_char = '^'
+
+        graph_lines = self.transcription(graph_string)
+
+        print(graph_lines)
+
+        self.k = sum(list(map(int, graph_lines[0].replace(self.merge_char, "").split(" "))))
+        self.l = len(graph_string.split("\n"))
+        self.cluster_list = []
+
+        counter.Counter.reset()
+        for i in range(self.l):
+            self.cluster_list.append(cluster.Cluster(self.k, i, graph_lines[i], self))
+
+    # new version of actualisation : the graph receives the exchanges the comps should do, and it exchange them instead of recreating them from scratch
+    def apply_cascade(self, graph_changes):
+        id_move1 = graph_changes.id_move1
+        id_move2 = graph_changes.id_move2
+        exchange_list = graph_changes.exchange_list
+
+        for c in self.cluster_list:
+            c.reset_reserve()
+
+        for ex in exchange_list:
+            i1 = ex[0]
+            i2 = ex[1]
+            id = ex[2]
+            comp = self.cluster_list[i1].get_and_delete_comp(id)
+            self.cluster_list[i2].add_to_reserve(comp)
+
+        for c in self.cluster_list:
+            c.remove_gone_comps()
+
+        for c in self.cluster_list:
+            c.apply_cascade(id_move1, id_move2)
+
+    def get_cluster(self, id):
+        for c in self.cluster_list:
+            if c.id == id:
+                return c
+        return None
 
     # return a list of binaries, that describes where is located every component
     def belonging_array(self, id1, id2):
         m = self.comp_number()
         belonging_array = np.ones((m, self.l))
+        id_array = np.zeros((m, self.l))
         sizes = []
-        ids = []
         counter = 0
         for i in range(self.l):
             sizes += self.cluster_list[i].get_sizes()
@@ -132,13 +146,14 @@ class Graph:
                 index1 = counter + tmp_ids_list.index(id1)
             if id2 in tmp_ids_list:
                 index2 = counter + tmp_ids_list.index(id2)
-            ids += tmp_ids_list
 
             m = self.cluster_list[i].comp_number()
+            id_array[counter:counter + m, i] = np.asarray(tmp_ids_list)  # DOUBTFULL
+
             for j in range(m):
                 belonging_array[counter, i] = 0
                 counter += 1
-        return belonging_array, sizes, ids, index1, index2
+        return belonging_array, sizes, id_array, index1, index2
 
     def to_string(self):
         tmp = ""
@@ -146,7 +161,7 @@ class Graph:
             tmp += c.to_string() + "\n"
         return tmp
 
-    def to_beautiful_string(self, thickness = 5, gap_btw_clusters = 2 ):
+    def to_beautiful_string(self, thickness=5, gap_btw_clusters=2):
         tmp_string = ""
         tmp_array = []
         for i in range(len(self.cluster_list)):
@@ -158,11 +173,9 @@ class Graph:
         tmp_array = np.transpose(np.asarray(tmp_array))
         for i in range(len(tmp_array)):
             for j in range(len(tmp_array[i])):
-                tmp_string += " "*gap_btw_clusters + tmp_array[i, j]
+                tmp_string += " " * gap_btw_clusters + tmp_array[i, j]
             tmp_string += '\n'
         return tmp_string
-
-
 
     def transcription(self, graph_string):
 
@@ -189,7 +202,6 @@ class Graph:
                     line_split[j] += self.merge_char
             lines[i] = " ".join(line_split)
         return lines
-
 
     def add_comp_to_merge(self, comp_id):
         if len(self.comps_to_merge) >= 2:

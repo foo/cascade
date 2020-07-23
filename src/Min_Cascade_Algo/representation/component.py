@@ -7,6 +7,15 @@ class Component:
         #self.node_list = [node.Node(id)]
         self.size = size
         self.id = id
+        self.moves = 0
+
+    def move(self):
+        self.moves += self.size
+
+    def merge(self, comp):
+        self.size += comp.size
+        self.id = min(self.id, comp.id)
+        self.moves += comp.moves
 
     def to_string(self):
         return str(self.size)

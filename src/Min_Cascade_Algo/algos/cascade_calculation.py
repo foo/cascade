@@ -1,5 +1,6 @@
 import pulp as p
 import numpy as np
+from representation import cascade_changes
 
 
 class Calculation:
@@ -11,7 +12,7 @@ class Calculation:
         l = g.l
         id1, id2 = g.comps_to_merge[0], g.comps_to_merge[1]
         Lp_prob = p.LpProblem('cascade', p.LpMinimize)
-        belonging_array, sizes, ids, index1, index2 = g.belonging_array(id1, id2)
+        belonging_array, sizes, id_array, index1, index2 = g.belonging_array(id1, id2)
         m = len(sizes)
 
         # creating the variables
@@ -41,20 +42,16 @@ class Calculation:
         if Lp_prob.sol_status != 1:
             return Lp_prob.sol_status, "", -1
         else:
+            exchange_list = []
+            for i in range(len(belonging_array)):
+                for j in range(len(belonging_array[i])):
+                    if belonging_array[i][j] == 0:
+                        tmp = [j, id_array[i][j]]
+                        break
+                for k in range(len(xs[i])):
+                    if xs[i][k].varValue == 1 and k != j:
+                        tmp.insert(1, k)
+                        exchange_list.append(tmp)
+            cc = cascade_changes.Cascade_Changes(id1, id2, exchange_list)
 
-            size_merged_comp = sizes[index1] + sizes[index2]
-            is_merged_comp_treated = False
-            new_graph = ""
-            for i in range(l):
-                for j in range(m):
-                    if int(sizes[j] * xs[j, i].varValue) != 0:
-                        if j == index1 or j == index2:
-                            if not is_merged_comp_treated:
-                                is_merged_comp_treated = True
-                                new_graph += str(int(size_merged_comp * xs[j, i].varValue)) + " "
-                        else:
-                            new_graph += str(int(sizes[j] * xs[j, i].varValue)) + " "
-                new_graph = new_graph[:len(new_graph) - 1]
-                new_graph += '\n'
-            new_graph = new_graph[:len(new_graph) - 1]
-            return Lp_prob.sol_status, new_graph, p.value(Lp_prob.objective)
+            return cc, p.value(Lp_prob.objective)
