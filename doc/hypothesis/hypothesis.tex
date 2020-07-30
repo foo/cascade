@@ -482,19 +482,59 @@ random feasible configurations.
 
 \section{Julien's adventures with cascade}
 
+\newpage
 \subsection{Integer programs that solve 1 request cascade}
 
 \subsubsection{Minimum cost cascade}
 
-(general $k, \ell$)
-
-We are given a set of components $\mathbb{C}$ ($|\mathbb{C}| = m$).
-We are given an initial assignment (placement) of components to clusters .
-
-
+We are given two natural numbers $k$ and $\ell$, a set of components $\mathcal{C}$ ($|\mathcal{C}| = m$), and a set of clusters (ToR's) $\mathcal{T}$ ($|\mathcal{T} = \ell$).
+We are given and sizes of these components $\mathcal{S} : \mathcal{C} \Rightarrow \mathbb{N}$.
+We are given an initial assignment (placement) of components to clusters, i.e., a boolean function $B : \mathcal{C} \times \mathcal{T}$ that is true iff. the component $c \in \mathcal{C}$ is initially in cluster $t \in \mathcal{T}$.
 New saturated edge appears between two distinguished components $A, B \in \mathbb{C}$.
 
-Let $x_{i,j}$ be a boolean value that determines if a component $i$ is in the final configuration in cluster $j$.
+The $IP_1$ is formulated as follows.
+Let $x_{i,j}$ be a boolean variable that we interpret as if a component $i$ is in the final configuration in cluster $j$.
+
+\[
+    \min \sum_{c \in \mathcal{C}} \sum_{t \in \mathcal{T}} (1-B(c, t)) \cdot S(c) \cdot x_{c,t} 
+\]
+with respect to the following constraints:
+\begin{equation}
+  \forall_{t\in \mathcal{T}} \sum_{c \in \mathcal{C}} S(c) \cdot x_{c,t} = k
+  \label{eq:capacity-constraints-ip1}
+\end{equation}
+\begin{equation}
+    \forall_{c\in \mathcal{C}} \sum_{t \in \mathcal{T}} x_{c,t} = 1
+    \label{eq:constraint-single-placement-ip1}
+\end{equation}
+\begin{equation}
+    \forall_{t \in \mathcal{T}} x_{A,t} = x_{B, t}
+    \label{eq:constraint-merge-ip1}
+\end{equation}
+\begin{equation}
+    \forall_{c\in \mathcal{C}} \forall_{t\in \mathcal{T}} x_{c, t} \in \{ 0, 1 \}
+\end{equation}
+
+
+We interpret the constraints in the following way: \ref{eq:capacity-constraints-ip1}  means that the capacity of clusters must by obeyed, \ref{eq:constraint-single-placement-ip1} means that each component can be at one cluster in the final configuration, \ref{eq:constraint-merge-ip1} means that distinguished components $A$ and $B$ are collocated.
+
+\subsubsection{Closest to initial cascade}
+
+\subsubsection{Closest to initial cascade and among them, the cheapest}
+
+\subsubsection{Minimum cascade and among them, the closest to initial configuration}
+
+\subsubsection{Per-node IP for closest to initial cascade}
+
+Variable $y_{n,t}$
+
+\subsection{Costly cascades}
+
+\subsubsection{k/2 cost cascade with at most sqrt size of components}
+
+\subsubsection{$O(k^2)$ cost cascade for $\ell$ servers}
+
+\subsection{k log k cost of a phase hypothesis for two servers}
 
 - full cost model
 
