@@ -3,3 +3,4 @@
 ./algos/__pycache__/
 ./evaluation/__pycache__/
 ./representation/__pycache__/
+./__pycache__
