@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 # k = int(sys.argv[1])
 # l = int(sys.argv[2])
-k = 10
+k = 15
 l = 2
 trial_number = 2000
 
