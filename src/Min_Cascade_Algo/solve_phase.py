@@ -5,32 +5,68 @@ import sys
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+import os.path
+from pathlib import Path
 
-k = int(sys.argv[1])
-l = int(sys.argv[2])
-trial_number = int(sys.argv[3])
-# k = 15
-# l = 2
-# trial_number = 2000
+def rename_file(best_score, output_file):
+    split = output_file.split(" ")
+    del split[-1]
+    split.append("bs=" + str(best_score) + ".txt")
+    tmp = ""
+    for s in split:
+        tmp += s + " "
+    s = s[:len(s)-2]
+    return tmp
 
-best_score = 0
+
+mode_list = ["classic", "general", "intra_cluster_only"]
+
+choose_mode = sys.argv[1]
+k = int(sys.argv[2])
+l = int(sys.argv[3])
+trial_number = int(sys.argv[4])
+output_file = "best_examples"
+
+if choose_mode not in mode_list:
+    raise ValueError("The mode that was entered does not exist. Existing modes: classic, general, intra_cluster_only")
+if not os.path.exists(output_file + "/" + str(choose_mode)):
+    Path(output_file + "/" + str(choose_mode)).mkdir(parents=True, exist_ok=True)
+output_file = output_file + "/" + str(choose_mode)
+if not os.path.exists(output_file + "/" + choose_mode + " l=" + str(l)):
+    Path(output_file + "/" + choose_mode + " l=" + str(l)).mkdir(parents=True, exist_ok=True)
+output_file += "/" + choose_mode + " l=" + str(l)
+if len([filename for filename in os.listdir(output_file) if filename.startswith(choose_mode + " l=" + str(l) + " k=" + str(k))]) == 0:
+    output_file += "/" + choose_mode + " l=" + str(l) + " k=" + str(k) + " bs=0.txt"
+    my_file = open(output_file, "w+")
+    best_score = 0
+else:
+    file_name = [filename for filename in os.listdir(output_file) if filename.startswith(choose_mode + " l=" + str(l) + " k=" + str(k))][0]
+    best_score = int(file_name.split(" ")[-1].split(".")[0][3:])
+    output_file += "/" + file_name
+    my_file = open(output_file, "w+")
+
 scores = []
-best_phases = []
 moves = []
 for i in range(trial_number):
     t0 = time.time()
-    p = phase.Phase(k, l)
-    p.start_phase("random")
+    p = phase.Phase(k, l, choose_mode)
+    p.start_phase()
     if best_score < sum(p.cascade_costs):
         best_score = sum(p.cascade_costs)
-        best_phases.clear()
-        best_phases.append(p.history)
+        my_file.close()
+        os.rename(output_file, rename_file(best_score, output_file))
+        output_file = rename_file(best_score, output_file)
+        my_file = open(output_file, "w+")
+        my_file.truncate(0)
+        my_file.write("\n\n\n")
+        my_file.write(p.history)
         scores.clear()
         scores.append(p.cascade_costs)
         moves.clear()
         moves.append(p.g.get_moves())
     elif best_score == sum(p.cascade_costs):
-        best_phases.append(p.history)
+        my_file.write("\n\n\n")
+        my_file.write(p.history)
         scores.append(p.cascade_costs)
         moves.append(p.g.get_moves())
     duration = time.time() - t0
@@ -39,14 +75,10 @@ for i in range(trial_number):
     minutes = (remaining_time - hours * 3600) // 60
     print(i * 100 / trial_number, "%   rem. time: ", int(hours), "h", int(minutes), "m   best : ", best_score)
 
-for l in range(len(best_phases)):
-    for t in range(len(best_phases[l])):
-        print(best_phases[l][t])
-        if t < len(best_phases[l])-1:
-            print("cost:", scores[l][t])
-    print(moves[l])
-
 print("best score : ", best_score)
+
+
+
 
 # moves = np.asarray(p.moves)
 # sizes = np.asarray(p.sizes)

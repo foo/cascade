@@ -8,12 +8,13 @@ import random as rd
 
 class Phase:
 
-    def __init__(self, k, l):
+    def __init__(self, k, l, choose_mode="classic"):
         self.k = k
         self.l = l
         self.cascade_costs = []
         self.g = graph.Graph(self.k, self.l)
-        self.history = []
+        self.history = ""
+        self.choose_mode = choose_mode
 
         # ----------------------for experiments ---------------
         self.cascade_number = 0
@@ -25,19 +26,24 @@ class Phase:
             self.sizes.append([])
         self.max_ratio = 0
 
-    def start_phase(self, choose_mode):
+    def start_phase(self):
+
+        self.g.comps_to_merge = self.g.next_request(self.choose_mode)
+        self.history += self.g.to_string(self.g.comps_to_merge) + '\n'
 
         can_phase_continue = True
         while can_phase_continue:
-            self.g.comps_to_merge = self.g.next_request(choose_mode)
-            self.history.append(self.g.to_string(self.g.comps_to_merge))
-            is_cascade_possible, new_graph = cascade_calculation.Calculation.possible_cascade(self.g)
+
+            is_cascade_possible, graph_changes = cascade_calculation.Calculation.possible_cascade(self.g)
             can_phase_continue = is_cascade_possible == 1
             if can_phase_continue:
-                self.g.apply_cascade(new_graph)
+                self.g.apply_cascade(graph_changes)
+
                 self.cascade_number += 1
                 self.cascade_costs.append(self.g.get_last_cascade_cost())
 
+                self.g.comps_to_merge = self.g.next_request(self.choose_mode)
+                self.history += "cascade cost: " + str(self.g.get_last_cascade_cost()) + '\n\n' + str(self.g.to_string(self.g.comps_to_merge)) + '\n'
 
                 # ids = self.g.get_id_list()
                 # # for i in range(len(self.moves)):

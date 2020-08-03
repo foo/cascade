@@ -36,7 +36,7 @@ class Graph:
     #         self.cluster_list.append(cluster.Cluster(self.k, i, graph_lines[i], self))
 
     def next_request(self, choose_mod):
-        if choose_mod == "random":
+        if choose_mod == "classic":
             comp_id_list = self.get_id_list()
             # if len(comp_id_list) <=1 or len(comp_id_list[0])<=1:
             #     print("too few components")
@@ -49,7 +49,7 @@ class Graph:
             return [comp1, comp2]
 
         #random requests, even btw comps in the same cluster
-        if choose_mod == "total_random":
+        if choose_mod == "general":
             comp_id_list = self.get_all_ids_in_one_list()
             # if len(comp_id_list) <=1 or len(comp_id_list[0])<=1:
             #     print("too few components")
