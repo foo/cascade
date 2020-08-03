@@ -15,7 +15,7 @@ def rename_file(best_score, output_file):
     tmp = ""
     for s in split:
         tmp += s + " "
-    tmp = tmp[:len(tmp)-2]
+    tmp = tmp[:len(tmp)-1]
     return tmp
 
 
