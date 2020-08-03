@@ -6,11 +6,12 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-# k = int(sys.argv[1])
-# l = int(sys.argv[2])
-k = 15
-l = 2
-trial_number = 2000
+k = int(sys.argv[1])
+l = int(sys.argv[2])
+trial_number = int(sys.argv[3])
+# k = 15
+# l = 2
+# trial_number = 2000
 
 best_score = 0
 scores = []
