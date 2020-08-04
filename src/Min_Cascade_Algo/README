@@ -2,7 +2,18 @@
 REQUIRED LIBRARIES ---------------------------------------------------------------------
 You must have pulp, numpy and random
 
-GRAPH REPRESENTATION -------------------------------------------------------------------
+PHASE TRIALS AND HYPOTHESIS CHECKINGS ----------------------------------------------------
+For example, enter: python solve_phase.py classic 30 2 1000
+4 args:
+    - first one is the mode: classic for merges to be only btw different clusters, general for it to be btw every 2 clusters, intra_cluster_only for it to be in the same cluster only.
+    - second one is k, capacity of each cluster
+    - third one is l, number of clusters
+    - fourth one is the number of trials, so the number of phases that will be done
+A phase starts with l clusters, filled with singletons. The program will try to merge 2 compoenents at each steps, until a merge fails.
+In solve_phase.py, there is the main for loop that tries every phase. For now, the properties that we want to check are tested in this loop. 
+
+
+ONE CASCADE SOLVING -------------------------------------------------------------------
 the graphes are represented with strings as follows:
     - each line represent a cluster. Each integer on this line is the size of a component that is contained in the cluster
     - n and m integers, n^m means that components of size n are repeated m times
