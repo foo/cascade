@@ -3,20 +3,9 @@ from algos import cascade_calculation
 from pathlib import Path
 import sys
 import time
+import file_manager
 import numpy as np
-import matplotlib.pyplot as plt
-import os.path
-from pathlib import Path
 
-def rename_file(best_score, output_file):
-    split = output_file.split(" ")
-    del split[-1]
-    split.append("bs=" + str(best_score) + ".txt")
-    tmp = ""
-    for s in split:
-        tmp += s + " "
-    tmp = tmp[:len(tmp)-1]
-    return tmp
 
 
 mode_list = ["classic", "general", "intra_cluster_only"]
@@ -25,25 +14,11 @@ choose_mode = sys.argv[1]
 k = int(sys.argv[2])
 l = int(sys.argv[3])
 trial_number = int(sys.argv[4])
-output_file = "best_examples"
-
 if choose_mode not in mode_list:
     raise ValueError("The mode that was entered does not exist. Existing modes: classic, general, intra_cluster_only")
-if not os.path.exists(output_file + "/" + str(choose_mode)):
-    Path(output_file + "/" + str(choose_mode)).mkdir(parents=True, exist_ok=True)
-output_file = output_file + "/" + str(choose_mode)
-if not os.path.exists(output_file + "/" + choose_mode + " l=" + str(l)):
-    Path(output_file + "/" + choose_mode + " l=" + str(l)).mkdir(parents=True, exist_ok=True)
-output_file += "/" + choose_mode + " l=" + str(l)
-if len([filename for filename in os.listdir(output_file) if filename.startswith(choose_mode + " l=" + str(l) + " k=" + str(k))]) == 0:
-    output_file += "/" + choose_mode + " l=" + str(l) + " k=" + str(k) + " bs=0.txt"
-    my_file = open(output_file, "w+")
-    best_score = 0
-else:
-    file_name = [filename for filename in os.listdir(output_file) if filename.startswith(choose_mode + " l=" + str(l) + " k=" + str(k))][0]
-    best_score = int(file_name.split(" ")[-1].split(".")[0][3:])
-    output_file += "/" + file_name
-    my_file = open(output_file, "w+")
+
+fm = file_manager.FileManager("best_examples")
+best_score = fm.get_or_create_file(k, l, choose_mode)
 
 scores = []
 moves = []
@@ -51,24 +26,27 @@ for i in range(trial_number):
     t0 = time.time()
     p = phase.Phase(k, l, choose_mode)
     p.start_phase()
+
+    # TO COMPUTE THE MAX COST OF A PHASE
     if best_score < sum(p.cascade_costs):
         best_score = sum(p.cascade_costs)
-        my_file.close()
-        os.rename(output_file, rename_file(best_score, output_file))
-        output_file = rename_file(best_score, output_file)
-        my_file = open(output_file, "w+")
-        my_file.truncate(0)
-        my_file.write("\n\n\n")
-        my_file.write(p.history)
+        fm.redo_file(best_score, p.history)
         scores.clear()
         scores.append(p.cascade_costs)
         moves.clear()
         moves.append(p.g.get_moves())
     elif best_score == sum(p.cascade_costs):
-        my_file.write("\n\n\n")
-        my_file.write(p.history)
+        fm.update_file(p.history)
         scores.append(p.cascade_costs)
         moves.append(p.g.get_moves())
+
+    # TO CHECK THE PROPERTY: after each cascade, cost <= l*s*log(s), where s is the number of revealed edges
+    for j in range(0, len(p.cascade_costs)):
+        if sum(p.cascade_costs[:j]) > l*(j+1) * np.log2(j+1):
+            fm.store_counter_example("best_examples", "false lslog(s) property ", p.history, p.cascade_costs, j)
+            break
+
+
     duration = time.time() - t0
     remaining_time = (trial_number - i) * duration
     hours = remaining_time // 3600

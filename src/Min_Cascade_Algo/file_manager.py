@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 import os.path
 from pathlib import Path
 
-class file_management:
+
+class FileManager:
 
     def __init__(self, output_file):
         self.output_file = output_file
@@ -31,12 +32,20 @@ class file_management:
             self.my_file = open(self.output_file, "w+")
         return best_score
 
-    def update_file(self, ):
+    def redo_file(self, best_score, new_text):
+        self.my_file.close()
+        os.rename(self.output_file, self.rename_best_score_file(best_score))
+        self.output_file = self.rename_best_score_file(best_score)
+        self.my_file = open(self.output_file, "w+")
+        self.my_file.truncate(0)
+        self.my_file.write(new_text)
 
+    def update_file(self, new_text):
+        self.my_file.write("\n\n\n")
+        self.my_file.write(new_text)
 
-
-    def rename_best_score_file(self, best_score, output_file):
-        split = output_file.split(" ")
+    def rename_best_score_file(self, best_score):
+        split = self.output_file.split(" ")
         del split[-1]
         split.append("bs=" + str(best_score) + ".txt")
         tmp = ""
@@ -44,3 +53,19 @@ class file_management:
             tmp += s + " "
         tmp = tmp[:len(tmp) - 1]
         return tmp
+
+    def store_counter_example(self, repos_path, file_name, text, cascade_cost, error_step_index):
+        if not os.path.exists(repos_path + "/" + "counter_examples"):
+            Path(repos_path + "/" + "counter_examples").mkdir(parents=True, exist_ok=True)
+        repos_path += "/" + "counter_examples"
+        if len([filename for filename in os.listdir(repos_path) if
+                filename.startswith(repos_path)]) == 0:
+            new_file = open(repos_path + "/" + file_name, "w+")
+        else:
+            return
+        new_file.write(text + "\n\n")
+        new_file.write("costs: " + ''.join(str(e) + " " for e in cascade_cost) + "\n" + "error at cascase " + str(error_step_index))
+
+
+
+

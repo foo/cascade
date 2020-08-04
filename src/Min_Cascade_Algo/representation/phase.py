@@ -1,6 +1,5 @@
 from representation import graph
 from algos import cascade_calculation
-import inputs
 import matplotlib.pyplot as plt
 import numpy as np
 import random as rd
@@ -15,10 +14,10 @@ class Phase:
         self.g = graph.Graph(self.k, self.l)
         self.history = ""
         self.choose_mode = choose_mode
+        self.moves = []
 
         # ----------------------for experiments ---------------
         self.cascade_number = 0
-        self.moves = []
         for i in range(k * l):
             self.moves.append([])
         self.sizes = []
