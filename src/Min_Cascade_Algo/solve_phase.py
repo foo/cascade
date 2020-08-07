@@ -5,8 +5,7 @@ import sys
 import time
 import file_manager
 import numpy as np
-
-
+import matplotlib.pyplot as plt
 
 mode_list = ["classic", "general", "intra_cluster_only"]
 
@@ -42,21 +41,37 @@ for i in range(trial_number):
 
     # TO CHECK THE PROPERTY: after each cascade, cost <= l*s*log(s), where s is the number of revealed edges
     for j in range(0, len(p.cascade_costs)):
-        if sum(p.cascade_costs[:j]) > l*(j+1) * np.log2(j+1):
+        if sum(p.cascade_costs[:j]) > l * (j + 1) * np.log2(j + 1):
             fm.store_counter_example("best_examples", "false lslog(s) property ", p.history, p.cascade_costs, j)
+            print("counter example!! false lslog(s) property")
             break
 
+    # TO CHECK THE PROPERTY: after each cascade, cost <= max(2, l*s*log(s)), where s is the number of revealed edges
+    for j in range(0, len(p.cascade_costs)):
+        if sum(p.cascade_costs[:j + 1]) > max(2, l * (j + 1) * np.log2(j + 1)):
+            fm.store_counter_example("best_examples", "false max(2, lslog(s) property) ", p.history, p.cascade_costs, j)
+            print("counter example!! false max(2, lslog(s) property")
+            break
 
     duration = time.time() - t0
     remaining_time = (trial_number - i) * duration
     hours = remaining_time // 3600
     minutes = (remaining_time - hours * 3600) // 60
-    print(i * 100 / trial_number, "%   rem. time: ", int(hours), "h", int(minutes), "m   best : ", best_score)
+    print(i * 100 / trial_number, "%  rem. time: ", int(hours), "h", int(minutes), "m score: ", sum(p.cascade_costs),
+          " best : ", best_score)
 
 print("best score : ", best_score)
 
 
+def f(x):
+    return 2 * x * np.log2(x)
 
+
+score = np.asarray([sum(scores[0][:i]) for i in range(len(scores[0]))])
+X = np.asarray(range(1, len(score) + 1))
+plt.plot(X, score)
+plt.plot(X, f(X))
+plt.show()
 
 # moves = np.asarray(p.moves)
 # sizes = np.asarray(p.sizes)
