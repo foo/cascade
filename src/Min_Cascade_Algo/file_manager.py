@@ -20,7 +20,7 @@ class FileManager:
             Path(self.output_file + "/" + choose_mode + " l=" + str(l)).mkdir(parents=True, exist_ok=True)
         self.output_file += "/" + choose_mode + " l=" + str(l)
         if len([filename for filename in os.listdir(self.output_file) if
-                filename.startswith(choose_mode + " l=" + str(l) + " k=" + str(k))]) == 0:
+                filename.startswith(choose_mode + " l=" + str(l) + " k=" + str(k) + " ")]) == 0:
             self.output_file += "/" + choose_mode + " l=" + str(l) + " k=" + str(k) + " bs=0.txt"
             self.my_file = open(self.output_file, "w+")
             best_score = 0
@@ -29,7 +29,7 @@ class FileManager:
                          filename.startswith(choose_mode + " l=" + str(l) + " k=" + str(k))][0]
             best_score = int(file_name.split(" ")[-1].split(".")[0][3:])
             self.output_file += "/" + file_name
-            self.my_file = open(self.output_file, "w+")
+            self.my_file = open(self.output_file, "a+")
         return best_score
 
     def redo_file(self, best_score, new_text):

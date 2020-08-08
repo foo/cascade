@@ -7,7 +7,7 @@ import file_manager
 import numpy as np
 import matplotlib.pyplot as plt
 
-mode_list = ["classic", "general", "intra_cluster_only"]
+mode_list = ["classic", "general", "intra_cluster_only", "perfect_build"]
 
 choose_mode = sys.argv[1]
 k = int(sys.argv[2])
@@ -63,15 +63,15 @@ for i in range(trial_number):
 print("best score : ", best_score)
 
 
-def f(x):
-    return 2 * x * np.log2(x)
-
-
-score = np.asarray([sum(scores[0][:i]) for i in range(len(scores[0]))])
-X = np.asarray(range(1, len(score) + 1))
-plt.plot(X, score)
-plt.plot(X, f(X))
-plt.show()
+# def f(x):
+#     return 2 * x * np.log2(x)
+#
+#
+# score = np.asarray([sum(scores[0][:i]) for i in range(len(scores[0]))])
+# X = np.asarray(range(1, len(score) + 1))
+# plt.plot(X, score)
+# plt.plot(X, f(X))
+# plt.show()
 
 # moves = np.asarray(p.moves)
 # sizes = np.asarray(p.sizes)

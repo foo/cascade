@@ -73,6 +73,33 @@ class Graph:
 
             return [self.get_id_list()[0][0], self.get_id_list()[1][0]]
 
+        if choose_mod == "perfect_build":
+            comp_id_list = self.get_id_list()
+            comp_size_list = self.get_sizes_per_clusters()
+            not_found = True
+            counter = 0
+            if len(comp_size_list) <= 1:
+                raise ValueError("number of clusters less or equal to 1")
+            while not_found:
+                index_cluster1 = rd.randint(0, len(comp_size_list)-1)
+                index_comp1 = rd.randint(0, len(comp_size_list[index_cluster1])-1)
+                size1 = comp_size_list[index_cluster1][index_comp1]
+
+                index_cluster2 = rd.randint(0, len(comp_size_list) - 1)
+                while index_cluster2 == index_cluster1:
+                    index_cluster2 = rd.randint(0, len(comp_size_list) - 1)
+                index_comp2 = rd.randint(0, len(comp_size_list[index_cluster2])-1)
+                size2 = comp_size_list[index_cluster2][index_comp2]
+                counter += 1
+                if size1 == size2 or size1 == size2+1 or size1+1 == size2:
+                    comp1 = comp_id_list[index_cluster1][index_comp1]
+                    comp2 = comp_id_list[index_cluster2][index_comp2]
+                    not_found = False
+                if counter > self.k * self.l * 10:
+                    print("it was random!")
+                    return self.next_request("classic")
+            return [comp1, comp2]
+
         if choose_mod == "smallest equal":
             # the components in each clusters are supposed to be sorted
             smallest_comp_list = []
