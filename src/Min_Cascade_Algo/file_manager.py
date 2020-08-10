@@ -26,7 +26,7 @@ class FileManager:
             best_score = 0
         else:
             file_name = [filename for filename in os.listdir(self.output_file) if
-                         filename.startswith(choose_mode + " l=" + str(l) + " k=" + str(k))][0]
+                         filename.startswith(choose_mode + " l=" + str(l) + " k=" + str(k) + " ")][0]
             best_score = int(file_name.split(" ")[-1].split(".")[0][3:])
             self.output_file += "/" + file_name
             self.my_file = open(self.output_file, "a+")
