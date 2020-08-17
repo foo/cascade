@@ -21,7 +21,9 @@ best_score = fm.get_or_create_file(k, l, choose_mode)
 
 scores = []
 moves = []
+cascade_repartition = np.zeros(int(np.log2(k)))
 for i in range(trial_number):
+    tmp_cascade_repartition = np.zeros(int(np.log2(k)))
     t0 = time.time()
     p = phase.Phase(k, l, choose_mode)
     p.start_phase()
@@ -53,12 +55,21 @@ for i in range(trial_number):
             print("counter example!! false max(2, lslog(s) property")
             break
 
+    # TO SEE THE REPARTITION OF CASCADES, DEPENDING ON THEIR COST
+    for c in p.cascade_costs:
+        index = int(np.log2(int(c/l)))
+        tmp_cascade_repartition[index] += 1
+    for j in range(len(tmp_cascade_repartition)):
+        if tmp_cascade_repartition[j] > cascade_repartition[j]:
+            cascade_repartition[j] = tmp_cascade_repartition[j]
+
     duration = time.time() - t0
     remaining_time = (trial_number - i) * duration
     hours = remaining_time // 3600
     minutes = (remaining_time - hours * 3600) // 60
-    print(i * 100 / trial_number, "%  rem. time: ", int(hours), "h", int(minutes), "m score: ", sum(p.cascade_costs),
-          " best : ", best_score)
+    print(i * 100 / trial_number, "% rem. time:", int(hours), "h", int(minutes), "m score:", sum(p.cascade_costs),
+          "best :", best_score)
+    print("cas. repart.: ", cascade_repartition)
 
 print("best score : ", best_score)
 
