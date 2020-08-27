@@ -157,9 +157,9 @@ also comes at a price: the state transfer is bandwidth intensive, and may even
 lead to short service interruptions. Therefore the goal is to design online
 algorithms that find a good trade-off between the inter-server communication
 cost and the migration cost.
-%
-%Such mechanisms play an~important role in load balancing in the data center and allow for sophisticated optimizations such as \emph{reducing network distance between communicating virtual machines}.
-%In this chapter, we focus on migration capabilities provided by modern virtualization technologies used for efficient usage of important resource in the data center --- the network bandwidth.
+
+Such mechanisms play an~important role in load balancing in the data center and allow for sophisticated optimizations such as \emph{reducing network distance between communicating virtual machines}.
+In this chapter, we focus on migration capabilities provided by modern virtualization technologies used for efficient usage of important resource in the data center --- the network bandwidth.
 The problem central to the first part of this chapter is stated as follows:
 
 \begin{center}
@@ -226,19 +226,13 @@ other machines), to free up space.
 
 In the model described above, every physical machine fully utilizes its processing capabilities --- it hosts the maximum possible number of~virtual machines, i.e., $k=n/\ell$.
 Hence, the migration is not possible without further reconfigurations: to respect physical machine capacity, we need to decide which virtual machines to swap.
-For this setting, we show a deterministic lower bound of~$k$, where $k$ is the physical machines hosting capacity.
-We also present a constant-competitive algorithm for the scenario restricted to physical machines that can host two virtual machines ($k = 2$).
 
-In Chapter~\ref{ch:dynamic-mapping}, we also consider the resource-augmented scenario, where we relax the above assumption: now the total hosting capacity of physical machines exceeds the~total number of~virtual machines, i.e., $k > n/\ell$.
-Surprisingly, the lower bound remains $k$ also in this setting.
-The main contribution of this part is an $O(k\cdot \log k)$-competitive algorithm for the scenario with a small resource augmentation.
-
-%This fundamental online optimization problem has many applications. For
-%example, in the context of~cloud computing, $n$ may represent virtual machines
-%or containers that are distributed across~$\ell$ physical servers, each having
-%$k$ cores: each server can host $k$ virtual machines. We would like to
-%(dynamically) distribute the virtual machines across the servers such that
-%datacenter traffic and migration costs are minimized.
+This fundamental online optimization problem has many applications. For
+example, in the context of~cloud computing, $n$ may represent virtual machines
+or containers that are distributed across~$\ell$ physical servers, each having
+$k$ cores: each server can host $k$ virtual machines. We would like to
+(dynamically) distribute the virtual machines across the servers such that
+datacenter traffic and migration costs are minimized.
 
 
 \subsection{Related Work}
@@ -272,7 +266,7 @@ data is costly, an embedding algorithm should be aware of the data placement,
 and allocate computational resources close to the data.
 Redundant storage gives additional optimization possibilities.
 In this chapter, we study data locality and replica-aware virtual network embeddings in tree topologies.
-%Note that our variant is not strictly a~generalization of a virtual network embedding, as we took simplifying assumptions about the traffic demands.
+
 
 \medskip
 
