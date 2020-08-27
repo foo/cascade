@@ -78,14 +78,18 @@ def run():
 
     print("best score : ", best_score)
 
-if __name__ == '__main__':
-    import cProfile, pstats
-    profiler = cProfile.Profile()
-    profiler.enable()
+profile = False
+if profile:
+    if __name__ == '__main__':
+        import cProfile, pstats
+        profiler = cProfile.Profile()
+        profiler.enable()
+        run()
+        profiler.disable()
+        stats = pstats.Stats(profiler).sort_stats('cumtime')
+        stats.print_stats()
+else:
     run()
-    profiler.disable()
-    stats = pstats.Stats(profiler).sort_stats('cumtime')
-    stats.print_stats()
 
 # def f(x):
 #     return 2 * x * np.log2(x)
