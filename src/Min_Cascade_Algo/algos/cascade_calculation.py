@@ -36,8 +36,11 @@ class Calculation:
         for i in range(l):
             Lp_prob += xs[index1, i] == xs[index2, i]
         # solving the problem
-        path_to_solver = r'C:\gurobi902\win64\bin\grb_ts.exe'
-        solver = p.PULP_CBC_CMD( msg=0)
+        
+        #path_to_solver = r'C:\gurobi902\win64\bin\grb_ts.exe'
+        # solver = p.PULP_CBC_CMD( msg=0)
+
+        solver = p.GLPK_CMD(msg=0)
         Lp_prob.solve(solver)
 
         # Comunicating the results to create a new graph

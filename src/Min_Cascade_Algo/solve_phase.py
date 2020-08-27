@@ -7,6 +7,10 @@ import file_manager
 import numpy as np
 import matplotlib.pyplot as plt
 
+import cProfile
+
+import pulp
+
 mode_list = ["classic", "general", "intra_cluster_only", "perfect_build"]
 
 choose_mode = sys.argv[1]
@@ -16,63 +20,72 @@ trial_number = int(sys.argv[4])
 if choose_mode not in mode_list:
     raise ValueError("The mode that was entered does not exist. Existing modes: classic, general, intra_cluster_only")
 
-fm = file_manager.FileManager("best_examples")
-best_score = fm.get_or_create_file(k, l, choose_mode)
+def run():
+    fm = file_manager.FileManager("best_examples")
+    best_score = fm.get_or_create_file(k, l, choose_mode)
 
-scores = []
-moves = []
-cascade_repartition = np.zeros(int(np.log2(k)))
-for i in range(trial_number):
-    tmp_cascade_repartition = np.zeros(int(np.log2(k)))
-    t0 = time.time()
-    p = phase.Phase(k, l, choose_mode)
-    p.start_phase()
+    scores = []
+    moves = []
+    cascade_repartition = np.zeros(int(np.log2(k)))
+    for i in range(trial_number):
+        tmp_cascade_repartition = np.zeros(int(np.log2(k)))
+        t0 = time.time()
+        p = phase.Phase(k, l, choose_mode)
+        p.start_phase()
 
-    # TO COMPUTE THE MAX COST OF A PHASE
-    if best_score < sum(p.cascade_costs):
-        best_score = sum(p.cascade_costs)
-        fm.redo_file(best_score, p.history)
-        scores.clear()
-        scores.append(p.cascade_costs)
-        moves.clear()
-        moves.append(p.g.get_moves())
-    elif best_score == sum(p.cascade_costs):
-        fm.update_file(p.history)
-        scores.append(p.cascade_costs)
-        moves.append(p.g.get_moves())
+        # TO COMPUTE THE MAX COST OF A PHASE
+        if best_score < sum(p.cascade_costs):
+            best_score = sum(p.cascade_costs)
+            fm.redo_file(best_score, p.history)
+            scores.clear()
+            scores.append(p.cascade_costs)
+            moves.clear()
+            moves.append(p.g.get_moves())
+        elif best_score == sum(p.cascade_costs):
+            fm.update_file(p.history)
+            scores.append(p.cascade_costs)
+            moves.append(p.g.get_moves())
 
-    # TO CHECK THE PROPERTY: after each cascade, cost <= l*s*log(s), where s is the number of revealed edges
-    for j in range(0, len(p.cascade_costs)):
-        if sum(p.cascade_costs[:j]) > l * (j + 1) * np.log2(j + 1):
-            fm.store_counter_example("best_examples", "false lslog(s) property ", p.history, p.cascade_costs, j)
-            print("counter example!! false lslog(s) property")
-            break
+        # TO CHECK THE PROPERTY: after each cascade, cost <= l*s*log(s), where s is the number of revealed edges
+        for j in range(0, len(p.cascade_costs)):
+            if sum(p.cascade_costs[:j]) > l * (j + 1) * np.log2(j + 1):
+                fm.store_counter_example("best_examples", "false lslog(s) property ", p.history, p.cascade_costs, j)
+                print("counter example!! false lslog(s) property")
+                break
 
-    # TO CHECK THE PROPERTY: after each cascade, cost <= max(2, l*s*log(s)), where s is the number of revealed edges
-    for j in range(0, len(p.cascade_costs)):
-        if sum(p.cascade_costs[:j + 1]) > max(2, l * (j + 1) * np.log2(j + 1)):
-            fm.store_counter_example("best_examples", "false max(2, lslog(s) property) ", p.history, p.cascade_costs, j)
-            print("counter example!! false max(2, lslog(s) property")
-            break
+        # TO CHECK THE PROPERTY: after each cascade, cost <= max(2, l*s*log(s)), where s is the number of revealed edges
+        for j in range(0, len(p.cascade_costs)):
+            if sum(p.cascade_costs[:j + 1]) > max(2, l * (j + 1) * np.log2(j + 1)):
+                fm.store_counter_example("best_examples", "false max(2, lslog(s) property) ", p.history, p.cascade_costs, j)
+                print("counter example!! false max(2, lslog(s) property")
+                break
 
-    # TO SEE THE REPARTITION OF CASCADES, DEPENDING ON THEIR COST
-    for c in p.cascade_costs:
-        index = int(np.log2(int(c/l)))
-        tmp_cascade_repartition[index] += 1
-    for j in range(len(tmp_cascade_repartition)):
-        if tmp_cascade_repartition[j] > cascade_repartition[j]:
-            cascade_repartition[j] = tmp_cascade_repartition[j]
+        # TO SEE THE REPARTITION OF CASCADES, DEPENDING ON THEIR COST
+        for c in p.cascade_costs:
+            index = int(np.log2(int(c/l)))
+            tmp_cascade_repartition[index] += 1
+        for j in range(len(tmp_cascade_repartition)):
+            if tmp_cascade_repartition[j] > cascade_repartition[j]:
+                cascade_repartition[j] = tmp_cascade_repartition[j]
 
-    duration = time.time() - t0
-    remaining_time = (trial_number - i) * duration
-    hours = remaining_time // 3600
-    minutes = (remaining_time - hours * 3600) // 60
-    print(i * 100 / trial_number, "% rem. time:", int(hours), "h", int(minutes), "m score:", sum(p.cascade_costs),
-          "best :", best_score)
-    print("cas. repart.: ", cascade_repartition)
+        duration = time.time() - t0
+        remaining_time = (trial_number - i) * duration
+        hours = remaining_time // 3600
+        minutes = (remaining_time - hours * 3600) // 60
+        print(i * 100 / trial_number, "% rem. time:", int(hours), "h", int(minutes), "m score:", sum(p.cascade_costs),
+            "best :", best_score)
+        print("cas. repart.: ", cascade_repartition)
 
-print("best score : ", best_score)
+    print("best score : ", best_score)
 
+if __name__ == '__main__':
+    import cProfile, pstats
+    profiler = cProfile.Profile()
+    profiler.enable()
+    run()
+    profiler.disable()
+    stats = pstats.Stats(profiler).sort_stats('cumtime')
+    stats.print_stats()
 
 # def f(x):
 #     return 2 * x * np.log2(x)
