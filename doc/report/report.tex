@@ -1,0 +1,829 @@
+ \documentclass[a4paper,USenglish]{lipics-v2019}
+ 
+ \usepackage[utf8]{inputenc}
+ \usepackage{xspace}
+ \usepackage{balance}
+ \usepackage{amsmath,amsfonts,mathtools,amsthm}
+ \usepackage{algorithmic}
+ 
+ \usepackage{balance}
+ \usepackage{blindtext}
+ \usepackage{amsthm,amsmath,array,colortbl,graphicx,multirow}
+ \usepackage{comment}
+ \usepackage{balance}
+ \usepackage{tikz}
+ \usepackage{amsmath}
+ \usetikzlibrary{patterns} %
+ \usepackage{algorithm}
+ \usepackage[font={footnotesize}]{subcaption}
+ \usepackage[font={footnotesize}]{caption}
+ \usepackage{breakcites}
+ \usepackage{booktabs}
+ \usepackage{diagbox}
+ \usepackage{xcolor}
+ \usepackage{colortbl}
+ \usepackage{cleveref}
+ \usepackage{enumitem}
+ 
+ \mathchardef\mhyphen="2D
+ 
+ \title{Cascade Hypothesis for Dynamic Balanced Graph Partitioning}
+ \author{x}{y}{}{}{}
+ \authorrunning{Cascade Hypothesis}
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&&
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&&
+ %  our macros start
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&&
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%&&
+ 
+ \newcommand{\OPT}{\textsf{OPT}\xspace}
+ \newcommand{\ONL}{\textsf{ONL}\xspace}
+ \newcommand{\DET}{\textsf{CAS}\xspace}
+ \newcommand{\ALG}{\textsf{ALG}\xspace}
+ \newcommand{\PPL}{\textsf{PPL}\xspace}
+ \newcommand{\OBRP}{BRP}
+ \newcommand{\PPOBRP}{PP-BRP}
+ \newcommand{\dist}{\textsf{dist}}
+ \newcommand{\TAlg}{{\ensuremath{\textsf{CAS}}}\xspace}
+ 
+ \newcommand{\comm}{\textsc{comm}}
+ \newcommand{\OFF}{\textsc{Off}\xspace}
+ \newcommand{\Rep}{\textsc{Rep}}
+ 
+ 
+ 
+ 
+ \newtheorem{task}{Task}
+ \newtheorem{fact}{Fact}
+ \newtheorem{hypothesis}{Hypothesis}
+ \newtheorem{rem}{Remark}
+ \newtheorem{observation}{Observation}
+ \newtheorem{property}{Property}
+ 
+ 
+ \DeclarePairedDelimiter\pair{(}{)}
+ \DeclarePairedDelimiter\set{\{}{\}}
+ 
+ \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+ \DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+ 
+ \newcommand\mahmoud[1]{\color{orange}\textbf{Mahmoud: #1~}\color{black}}
+ \newcommand\stefan[1]{\color{blue}\textbf{Stefan: #1}\color{black}}
+ \newcommand\maciek[1]{\color{brown}\textbf{(Maciek: #1)}\color{black}}
+ %\newcommand\mahmoud[1]{}
+ %\newcommand\stefan[1]{}
+ %\newcommand\maciek[1]{}
+ 
+ \newcommand{\todo}[1]{\noindent\color{brown}{todo: #1}\color{black}}
+
+\begin{document}
+
+\maketitle
+
+\part{Intro text}
+
+In the last decades, we witnessed a growing demand for performing large-scale
+computations, such as protein folding, fluid dynamics, weather and market prediction, or production process optimization.
+The scale of such computations exceeds abilities of a single computer, hence they need to be performed on large sets of machines that cooperate over an interconnecting network.
+Owning and maintaining such large-scale computing infrastructure is often impractical and expensive, and parties look for alternative ways to perform computations.
+In comparison, outsourcing computations provides a wide range~of~benefits.
+First of all, it mitigates the costs of infrastructure management and maintenance.
+This is crucial especially for computational tasks that arise occasionally, such as high-quality rendering, computer verification of products with long development time or analysis of human-harvested data.
+Second, such an approach dismisses the need to foresee the appropriate demand for resources.
+If such demand increases unexpectedly, it can be immediately provided without physical extension of the infrastructure.
+This led to a shift of computations to large-scale remote facilities that contain computing machines with their support infrastructure, the so-called \emph{data centers}.
+Performing computations in these external data centers provides the impression of unlimited computational power on demand, and is called the \emph{cloud computing}.
+
+The demand for outsourcing computations to the cloud created a whole market for such services.
+Modern suppliers of processing power such as Microsoft Azure \cite{url-azure}, Amazon Web Services \cite{url-amazon-ec2} or Google Compute Engine \cite{url-gce} provide convenient on-demand computational power while hiding most of the details concerning resource management.
+Processing capabilities are quickly and conveniently accessible to every interested party.
+
+Computational tasks require multiple types of resources to complete: CPU time, memory, I/O operations and network bandwidth.
+Often the demand for these resources varies in time and is unpredictable.
+For this reason, a data center that performs just one task at the time would waste resources.
+In contrast, the co-existence of multiple tasks in the data center allows to~compensate for the variable demand for resources by resource-aware scheduling.
+Such techniques are especially useful in (but not limited to) computationally-intensive applications, where the response time is not the primary concern.
+
+\pagebreak
+
+\medskip
+The first part of this thesis assumes the perspective of a data center owner, who wants to~use owned resources in an efficient manner.
+For example, the processing speed can be scaled down to save energy, memory can be shared or distributed, and cooperating processes can be migrated closer to each other in the network to save bandwidth.
+In the first part of this thesis, we focus on the~last aspect and we show how it leads to
+\emph{efficient usage of an interconnecting network} in a data center.
+Optimization of this resource is critical for performing efficient large-scale computations, as these involve multiple machines that cooperate over the network.
+To this end, we will make use of a~sophisticated control system, called \emph{virtualization}.
+
+\section{Machine Virtualization in Data Centers}
+%\sectionmark{Data Center Scenario}
+\label{sec:intro-machine-virtualization}
+
+To use the data center's interconnecting network efficiently, cooperating computational tasks should be placed close to each other and close to the data they process.
+Algorithmic techniques presented in the first part of this thesis rely upon logical isolation of a computation from the~physical machine that performs the computation.
+This gives a~possibility to manage the~physical placement of a computation in a way that is transparent to the computation.
+A~particular piece of technology that provides the flexibility in placement of computations is~\emph{virtualization}.
+
+Virtualization provides an abstraction layer, called the \emph{virtual machine}, for the underlying hardware of a computer system.
+Virtual machine mimics the functionality of the physical hardware so closely that it can be used as an environment for a complete operating system.
+Such operating system, running on a virtual machine is called the \emph{guest
+operating system}. It operates in addition to the \emph{host operating
+system}, which runs directly on the physical hardware. 
+In a data center, the main purpose of virtualization is to provide a complete and non-restricted environment for the client that is isolated from the management software and other clients' tasks.
+The guest operating system is restricted to the virtualized environment: it has the perspective of housing a whole computer system.
+
+
+\subsection{Machine Migration}
+
+Besides providing an abstraction layer, mature virtualization solutions suited for data centers such as Xen
+\cite{url-xen}, KVM \cite{url-kvm}, Hyper-V \cite{url-hyperv}, VMware ESXi
+\cite{url-vmware}, provide several control features.
+In particular, absolute control over the underlying virtual hardware allows to suspend and resume the execution of the guest operating system at will.
+Such functionality provides building blocks for the feature of \emph{migration}, which transfers the complete virtual machine to~a~different physical machine.
+This is possible without shutting down the guest operating system, and hence it provides a powerful resource management tool that is transparent to clients.
+
+Distributed cloud applications, including batch processing
+applications such as MapReduce, streaming applications such as Apache Flink or
+Apache Spark, and scale-out databases and key-value stores such as Cassandra,
+generate a~significant amount of network traffic and a~considerable fraction
+of their runtime is due to network activity~\cite{MogPop12}. For example,
+traces of jobs from a Facebook data center reveal that network transfers on
+average account for 33\% of the execution time~\cite{orchestra}. In such
+applications, it is desirable that frequently communicating virtual machines
+are \emph{collocated}, i.e., mapped to the same physical server: 
+communication across the network (i.e., inter-server communication) induces
+network load and latency. However, migrating virtual machines between servers
+also comes at a price: the state transfer is bandwidth intensive, and may even
+lead to short service interruptions. Therefore the goal is to design online
+algorithms that find a good trade-off between the inter-server communication
+cost and the migration cost.
+%
+%Such mechanisms play an~important role in load balancing in the data center and allow for sophisticated optimizations such as \emph{reducing network distance between communicating virtual machines}.
+%In this thesis, we focus on migration capabilities provided by modern virtualization technologies used for efficient usage of important resource in the data center --- the network bandwidth.
+The problem central to the first part of this thesis is stated as follows:
+
+\begin{center}
+  \emph{How to assign virtual machines to physical machines to optimize network
+  usage?}
+\end{center}
+We elaborate more in the subsequent subsection.
+
+\subsection{Virtual Network Embedding}
+\label{sec:virt_net_emb}
+
+The computing power of a single virtual machine is usually insufficient for the client, as~the~resources of a~virtual machine are limited by resources available to its host.
+Therefore, data centers provide their resources as a sizeable set of virtual machines connected by a network.
+Collectively, the virtual machines with their interconnecting network are called a~\emph{virtual network}, where the cooperating virtual machines are referred to as \emph{nodes} of a virtual network.
+To~guarantee a certain quality of service (\emph{QoS}) for a multitude of co-existing virtual networks, up-front bandwidth reservations are required.
+However, the generality of performed calculations results in an unpredictability of communication patterns and poses a challenge in the optimization of bandwidth reservations.
+In this thesis, we provide algorithms for an efficient management of~network reservations without any assumptions about communication patterns.
+\subsubsection{Dynamic Mapping of Virtual Networks}
+\label{sec:contributions-dynamic-mapping}
+
+In Chapter~\ref{ch:dynamic-mapping}, we study virtual network embeddings in the scenario where virtual machines can be migrated during runtime to another physical machine.
+The possibility of migration allows reacting to unpredictable communication patterns.
+For example, if some distant nodes communicate often, it is vital to reduce their distance to save network bandwidth.
+The objective is to~minimize the total network bandwidth used for communication and for migration.
+
+We assume that the communication patterns are not known in advance to our algorithm.
+We measure the~quality of~presented algorithmic solutions by competitive analysis~\cite{borodin-book}, which is well-suited for problems that are online by their nature.
+In the competitive analysis, the goal is to~optimize \emph{the competitive ratio} of a given online algorithm: the ratio of its cost to the cost of~an~optimal offline algorithm that knows the whole input sequence in advance.
+
+In the dynamic scenario, we assume that the physical substrate network is a~tree of height one.
+That is, every physical machine (leaf) is connected directly to the root (that has no hosting capabilities).
+A single physical machine hosts a fixed number of virtual machines.
+The model restricted to such networks becomes a variant of online graph clustering.
+That is, we are given a~set of~$n$ nodes (virtual machines) with time-varying pairwise
+communication patterns, which have to be partitioned into~$\ell$~physical machines, each of
+capacity $k=n/\ell$.
+
+Intuitively, we would like to minimize inter-machine
+interactions by mapping frequently communicating nodes to the same physical machine
+Since communication patterns change over time, the~nodes should be \emph{repartitioned}, in
+an online manner, by \emph{migrating} them between physical machines.
+The~objective is to minimize the weighted sum of inter-machine communication and repartitioning costs.
+The former is defined as the number of communication requests between nodes placed at distinct physical machines, and the latter as the number of migrations.
+
+
+The possibility to perform a migration uncovers algorithmic challenges:
+\begin{itemize}
+
+\item \emph{Serve remotely or migrate?} For a brief communication
+pattern, it may not be worthwhile to collocate the nodes: the migration cost might
+be too large in comparison to~communication costs.
+
+\item \emph{Where to migrate, and what?}
+If an algorithm decides to collocate nodes $x$ and~$y$, the~question becomes
+how. Should $x$ be migrated to the physical machine holding $y$, $y$ to the one holding
+$x$, or should both nodes be migrated to a new machine?
+
+\item \emph{Which nodes to evict?}
+The space of the desired destination physical machine may not be sufficient. In
+this case, the~algorithm needs to decide which nodes to ``evict'' (migrate to
+other machines), to free up space.
+
+\end{itemize}
+
+In the model described above, every physical machine fully utilizes its processing capabilities --- it hosts the maximum possible number of~virtual machines, i.e., $k=n/\ell$.
+Hence, the migration is not possible without further reconfigurations: to respect physical machine capacity, we need to decide which virtual machines to swap.
+For this setting, we show a deterministic lower bound of~$k$, where $k$ is the physical machines hosting capacity.
+We also present a constant-competitive algorithm for the scenario restricted to physical machines that can host two virtual machines ($k = 2$).
+
+In Chapter~\ref{ch:dynamic-mapping}, we also consider the resource-augmented scenario, where we relax the above assumption: now the total hosting capacity of physical machines exceeds the~total number of~virtual machines, i.e., $k > n/\ell$.
+Surprisingly, the lower bound remains $k$ also in this setting.
+The main contribution of this part is an $O(k\cdot \log k)$-competitive algorithm for the scenario with a small resource augmentation.
+
+%This fundamental online optimization problem has many applications. For
+%example, in the context of~cloud computing, $n$ may represent virtual machines
+%or containers that are distributed across~$\ell$ physical servers, each having
+%$k$ cores: each server can host $k$ virtual machines. We would like to
+%(dynamically) distribute the virtual machines across the servers such that
+%datacenter traffic and migration costs are minimized.
+
+
+\subsection{Related Work}
+
+
+Recently, there has been much interest in programming models and distributed
+system architectures for processing and analysis of big data (see, e.g.,~\cite{mapreduce,nodb,shark}).
+Such applications
+generate large amounts of network traffic~\cite{orchestra,MogPop12,amazonbw},
+and over the last years, several systems have been proposed that provide a provable network performance.
+To guarantee a certain performance level, these systems reserve a portion of bandwidth among cooperating nodes.
+There are two major approaches to bandwidth reservations: some systems depend on supplying the possibly different volume of bandwidth communication between each pair of nodes~\cite{faircloud,elasticswitch,seawall}, while other systems allocate abundant bandwidth of equal volume among all nodes~\cite{oktopus,secondnet,drl,gatekeeper,proteus}.
+In this thesis we research both approaches: in Chapter~\ref{ch:static-mapping} we pre-reserve a portion of bandwidth among all cooperating nodes, while in Chapter~\ref{ch:dynamic-mapping} we perform the reservation as pairs of nodes communicate.
+
+\medskip
+
+In Chapter~\ref{ch:static-mapping}, we study virtual network embeddings, a problem of embedding a weighted \emph{guest} graph into a capacitated \emph{host} graph.
+The virtual network embedding problem is related to~classic VPN graph embedding problems~\cite{gupta2001provisioning,vpn1, vpn2, Goyal2008},
+a~problem that is NP-hard, and is constant-factor approximable even for asymmetric traffic demands~\cite{vpn-apx}.
+The VPN problem requires finding a graph embedding with fixed endpoints, while in virtual network embedding problems, studied in this thesis, the embedding endpoints are also subject to optimization.
+In this respect, the virtual network embedding problem can also be seen as related to
+classic Minimum Linear Arrangement problem~\cite{EvNaRS99,ord-prob} which asks for the
+embedding of communication graphs on simple line topologies.
+
+We consider a variant of virtual network embedding with extensions motivated by batch-processing applications.
+The most popular virtual network abstraction for batch-processing applications~\cite{mapreduce} is a virtual network that forms a clique~\cite{oktopus,MogPop12,infocom16,ccr15emb,proteus}.
+Existing embedding algorithms often ignore a~crucial dimension of the problem, namely data locality:
+an input to a batch-processing application is typically stored in a distributed
+and sometimes redundant file system. Since moving
+data is costly, an embedding algorithm should be aware of the data placement,
+and allocate computational resources close to the data.
+Redundant storage gives additional optimization possibilities.
+In this thesis, we study data locality and replica-aware virtual network embeddings in tree topologies.
+%Note that our variant is not strictly a~generalization of a virtual network embedding, as we took simplifying assumptions about the traffic demands.
+
+\medskip
+
+In Chapter~\ref{ch:dynamic-mapping}, we study an online balanced partitioning problem.
+The static offline version of~the~problem, i.e., a problem variant where
+migration is not allowed, where all requests are known in advance, and where
+the goal is to find an assignment of $n$ nodes to $\ell$~physical machines, each of~capacity $n/\ell$, is known as the
+\emph{$\ell$-balanced graph partitioning problem}. The problem is 
+NP-complete, and cannot even be approximated within any finite factor unless P
+= NP~\cite{AndRae06}.  The static
+variant where $\ell = 2$ corresponds to the minimum bisection problem, which
+is already NP-hard~\cite{GaJoSt76}, and 
+the currently best approximation ratio is $O(\log n)$~\cite{SarVaz95,ArKaKa99,FeKrNi00,FeiKra02,KraFei06,Raec08}.
+The inapproximability of the static variant for general values of $\ell$
+motivated research on the bicriteria variant, which can be seen as the offline
+counterpart of our capacity augmentation approach. Here, the~goal
+is~to~compute a~graph partitioning into $\ell$ components of~size at most~$k$ (where $k > n/\ell$) and the cost of the cut is compared to the optimal (non-augmented)
+solution where all components are of a~size at most $n/k$. The variant where
+$n \geq 2 \cdot k \cdot \ell$ was considered in
+\cite{LeMaTr90,SimTen97,EvNaRS00,EvNaRS99,KrNaSc09}. So far, the~best result~is~an~$O(\!\sqrt{\log n \cdot \log \ell})$-approximation algorithm~\cite{KrNaSc09}.
+
+Our dynamic model is related to online
+caching~\cite{SleTar85,FKLMSY91,McGSle91,AcChNo00}, sometimes also referred to
+as online caching, where requests for data items (nodes) arrive over time and
+need to be served from a cache of finite capacity, and where the number of
+cache misses must be minimized. Classic problem variants usually boil down to
+finding a smart eviction strategy, such as Least Recently Used (LRU)~\cite{SleTar85}. In our
+setting, requests can be served remotely (i.e.,~without fetching the
+corresponding nodes to a single physical machine). In this light, our model is more
+reminiscent of caching models \emph{with
+bypassing}~\cite{EpImLN11,EpImLN15,Irani02}. As a~side result, we show that our problem is
+capable of emulating online caching.
+A major difference between  these problems is that in the caching problems, each request involves a~single element of the universe, while in our model \emph{both} endpoints of a communication request are subject to~optimization.
+
+This chapter further explores algorithmic challenges of network-efficient mapping of virtual networks in data centers.
+In Chapter~\ref{ch:static-mapping}, we considered the static mapping, where nodes of the virtual network (virtual machines) are placed at vertices of the physical substrate network until the computation task is done.
+However, communication patterns in virtual networks are difficult to predict, and static mappings may result in sub-optimal network utilization.
+In this chapter, we study the dynamic mapping, where it is possible to \emph{migrate} a virtual machine from one physical machine to another, incurring a fixed cost.
+We focus on a particular substrate network topology, namely a $1$-level tree.
+
+In contrast to Chapter~\ref{ch:static-mapping}, where we focused on fixed virtual topology suitable for batch processing applications, now we study general virtual networks.
+The communication pattern is not known in advance, and upon receiving a communication request it is possible to reconfigure a mapping by migrating virtual machines.
+By migrating repeatedly communicating virtual machines closer together in the network, it is possible to reduce the overall network utilization.
+To emphasize the different focus of this chapter, we refer to vertices of the substrate network as clusters.
+
+\section{Problem Definition}
+
+
+Formally, the online \emph{Balanced RePartitioning} problem (BRP) is defined as
+follows. There is a set of $n$ nodes, initially distributed arbitrarily
+across $\ell$~clusters, each of size~$k$. We call two nodes~$u,v\in V$
+\emph{collocated} if they are in the same cluster.
+
+An input to the problem is a sequence of communication requests $\sigma =
+(u_1,v_1),$ $(u_2,v_2),$ $(u_3,v_3), \ldots$, where pair $(u_t,v_t)$ means that
+the nodes $u_t,v_t$ exchange a fixed amount of data. For succinctness of later descriptions,
+we assume that a request $(u_t,v_t)$ occurs at time $t \geq 1$. At any time~$t
+\geq 1$, an online algorithm needs to serve the~communication
+request~$(u_t,v_t)$. Right before serving the request, the online algorithm
+can repartition the nodes into new clusters. We assume that
+a~communication request between two collocated nodes costs 0. The cost of a~communication request between two nodes located in different clusters is
+normalized to~1, and the cost of migrating a node from one cluster to another
+is~$\alpha \geq 1$, where $\alpha$ is a parameter (an~integer). For any
+algorithm \ALG, we denote its total cost (consisting of communication plus
+migration costs) on sequence $\sigma$ by $\ALG(\sigma)$.
+
+The description of some algorithms (in particular the ones in Sections~\ref{sec:upper}
+and \ref{sec:crep}) is more natural if they first serve a request and then
+optionally migrate. Clearly, this modification can be implemented at no extra cost by
+postponing the migration to the next step.
+
+As already mentioned in the introduction, we will estimate
+the performance of an online algorithm by comparing to the performance of an optimal offline
+algorithm. Formally, let~$\ONL(\sigma)$, resp.~$\OPT(\sigma)$, be the cost
+incurred by an online algorithm \ONL, resp.~by an optimal offline
+algorithm \OPT, for a given sequence of requests~$\sigma$. In contrast to \ONL, which learns the~requests one-by-one as
+it serves them, \OPT has complete knowledge of the entire request
+sequence~$\sigma$ \emph{ahead of~time}. The goal is to design online repartitioning
+algorithms that provide worst-case guarantees. In particular, $\ONL$ is said
+to be \emph{$\rho$-competitive} if there is a constant $\beta$, such that for any
+input sequence~$\sigma$ it holds that
+\[
+	\ONL(\sigma) \leq \rho \cdot \OPT(\sigma) + \beta.
+\]
+Note that $\beta$ cannot depend on input $\sigma$ but can depend on other
+parameters of the problem, such as the number of nodes or the number of clusters.
+The minimum $\rho$ for which $\ONL$ is $\rho$-competitive is called the 
+\emph{competitive ratio} of $\ONL$. 
+\part{Cascade Hypothesis}
+
+\section{Problem definition of Dynamic Balanced Graph Partitioning}
+
+
+\noindent
+\textbf{Nodes and clusters.} There is a set of $n$ nodes, initially distributed arbitrarily
+across $\ell$~clusters, each of size~$k$. We call two nodes~$u,v\in V$
+\emph{collocated} if they are in the same cluster.
+
+\noindent
+\textbf{Input sequence.} An input to the problem is a sequence of communication requests $\sigma =
+(u_1,v_1),$ $(u_2,v_2),$ $(u_3,v_3), \ldots$, where pair $(u_t,v_t)$ means that
+the nodes $u_t,v_t$ exchange a fixed amount of data. At any time~$t
+$, an algorithm needs to serve the~communication
+request~$(u_t,v_t)$.
+
+
+\noindent
+\textbf{Reconfigurations.} Right before serving the request, the algorithm
+can move nodes between clusters.
+The nodes fit perfectly into the clusters,
+i.e.,~$n=k\cdot \ell$. Due to cluster capacity
+constraints, a node can never be migrated alone, but it must be \emph{swapped}
+with another node at a cost of~$2 \cdot \alpha$. We also assume that when an
+algorithm wants to migrate more than two nodes, this has to be done using
+several swaps, each involving two nodes.
+
+\noindent
+\textbf{The cost.} We assume that
+a~communication request between two collocated nodes (i.e., placed on the same
+server) costs 0. The cost of a~communication request between two nodes located in different clusters is
+1, and the cost of migrating a node from one cluster to another
+is~$\alpha \geq 1$, where $\alpha$ is a parameter (an~integer). 
+The total cost of an algorithm \ALG, consisting of communication plus migration
+cost.
+
+\subsection{Online algorithms and competitive analysis}
+
+The input to the problem is revealed one-by-one, in online fashion. Upon seeing
+a request, the algorithm must serve it without the knowledge of future requests
+(although prior to serving the request, it can reconfigure the nodes).
+
+
+We measure
+the performance of an online algorithm by comparing to the performance of an optimal offline
+algorithm. Formally, let~$\ONL(\sigma)$, resp.~$\OPT(\sigma)$, be the cost
+incurred by an online algorithm \ONL, resp.~by an optimal offline
+algorithm \OPT, for a given sequence of requests~$\sigma$. In contrast to \ONL, which learns the~requests one-by-one as
+it serves them, \OPT has complete knowledge of the entire request
+sequence~$\sigma$ \emph{ahead of~time}. The goal is to design online repartitioning
+algorithms that provide worst-case guarantees. In particular, $\ONL$ is said
+to be \emph{$\rho$-competitive} if there is a constant $\beta$, such that for any
+input sequence~$\sigma$ it holds that
+\[
+	\ONL(\sigma) \leq \rho \cdot \OPT(\sigma) + \beta.
+\]
+Note that $\beta$ cannot depend on input $\sigma$ but can depend on other
+parameters of the problem, such as the number of nodes or the number of clusters.
+The minimum $\rho$ for which $\ONL$ is $\rho$-competitive is called the 
+\emph{competitive ratio} of $\ONL$. 
+
+\noindent
+\textbf{Note on running time.}
+Although it is vital to keep the running time of an online algorithm low, it is
+not a strict requirement. In contrast to exact algorithms or approximation
+algorithms, the running time of an online algorithm may be exponential.
+The algorithmic challenge lies in making decisions without the knowledge of the
+future.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{The algorithm CAS}
+\label{sec:upper}
+
+We introduce $O(k^2
+\cdot \ell^2)$-competitive deterministic algorithm \DET. At any time, \DET
+serves a request, adjusts its internal structures (defined below)
+accordingly and then possibly migrates some nodes. \DET operates in phases, and each
+phase is analyzed separately. The first phase starts with the first request.
+
+In a single phase, \DET maintains a helper structure: a complete graph on all
+$\ell \cdot k$ nodes, with an edge present between each pair of nodes. We say
+that a communication request is \emph{paid} (by \DET) if it occurs between
+nodes from different clusters, and thus entails a cost for \DET. For each edge
+between nodes $x$ and $y$, we define its weight~$w(x,y)$ to be the number of
+paid communication requests between $x$ and~$y$ since the beginning of~the~current phase.
+
+Whenever an edge weight reaches $\alpha$, it is called \emph{saturated}.
+Throughout its execution, \DET maintains an invariant that saturated edges are inside clusters (i.e., two nodes of such edge are collocated). 
+From the perspective of node placement, this means that each node of a~connected component of saturated edges must be collocated in a single cluster.
+
+If a
+request causes the corresponding edge to~become saturated,
+we perform a \emph{reconfiguration} of nodes.
+\DET computes a new placement of nodes (potentially for all of them), so that all
+saturated edges are inside clusters.
+If finding such placement
+is not possible, node positions are not changed, the~current phase ends
+with the current request, and a new phase begins with the next request.
+Among all possible placements, \DET chooses the closest to the current
+configuration. 
+
+Note that there is only one new saturated edge at a~time, and all edge weights are reset to zero at the beginning of a phase.
+
+
+\begin{theorem}
+\DET is $O(k^2 \cdot \ell^2)$-competitive.
+\label{th:detsqare}
+\end{theorem}
+
+\begin{proof}
+We bound the costs of \DET and \OPT in a single phase. First, observe that
+whenever an~edge weight reaches $\alpha$, its endpoint nodes will be collocated 
+until the end of the phase, and therefore its weight is not
+incremented anymore. Hence the weight of any edge is at most $\alpha$.
+
+Second, observe that the graph induced by saturated edges always constitutes 
+a~forest. Suppose that, at a time $t$,
+two nodes $x$ and~$y$, which are not
+connected by a~saturated edge, become connected by a path of saturated edges.
+From that time onward, \DET stores them in a~single cluster. Hence, the
+weight~$w(x,y)$ cannot increase at subsequent time points, and $(x,y)$ may
+not become saturated. The forest property implies that the number of saturated
+edges is smaller than $k \cdot \ell$.
+
+The two observations above allow us to bound the cost of \DET in a single
+phase. The number of reorganizations is at most the number of saturated edges,
+i.e., at most~$k \cdot \ell$. As the cost associated with a single
+reorganization is $O(k \cdot \ell \cdot \alpha)$, the total cost of all node
+migrations in a single phase is at most $O(k^2 \cdot \ell^2 \cdot \alpha)$.
+The communication cost itself is equal to the total weight of all edges, and
+by the first observation, it is at most $\binom{k \cdot \ell}{2}
+\cdot \alpha < k^2 \cdot \ell^2 \cdot \alpha$. Hence, for any phase $P$ (also
+for the last one), it holds that $\DET(P) = O(k^2 \cdot \ell^2 \cdot \alpha)$.
+
+Now we lower-bound the cost of \OPT on any phase $P$ but the last one. If \OPT
+performs a~node swap in $P$, it pays $2 \cdot \alpha$. Otherwise its assignment of
+nodes to clusters is fixed throughout~$P$. Recall that at the end of $P$, \DET
+failed to reorganize the nodes. This means that for any static mapping of the
+nodes to clusters (in particular the one chosen by \OPT), there is a~saturated inter-cluster edge. The communication cost over such an~edge incurred
+by \OPT is at least $\alpha$ (it can be also strictly greater than~$\alpha$ as
+the edge weight only counts the communication requests paid by \DET).
+
+Therefore, the $\DET$-to-$\OPT$ cost ratio in any phase but the last one is at
+most $O(k^2 \cdot \ell^2)$ and the cost of \DET on the last phase is at
+most $O(k^2 \cdot \ell^2 \cdot \alpha)$. Hence,
+$\DET(\sigma) \leq O(k^2 \cdot \ell^2) \cdot \OPT(\sigma) + O(k^2 \cdot
+\ell^2 \cdot \alpha)$ for any input $\sigma$.
+\end{proof}
+
+\section{The cascade hypothesis.}
+
+Upon receiving a request, an edge may become saturated, 
+and \DET may perform a reconfiguration of its nodes.
+The cascade hypothesis aims to bound the cost of a single reconfiguration performed by \DET.
+
+\subsection{The cascade.}
+
+Consider an edge saturation event that triggers a reconfiguration from a configuration $C_I$ to a configuration $C_F$.
+Prior to the event, the two nodes $u,v$ of the new saturated edge were located in different clusters --- only paid requests increase the counter.
+\DET collocates $u$ and $v$ in a single cluster, e.g. it may migrate $u$ to $v$'s cluster or migrate both $u$ and $v$ to a common cluster.
+
+To collocate $u$ and $v$, we may need to additionally migrate other nodes.
+This is due to the limited capacity of clusters, and also to keep saturated edges inside clusters.
+    
+The partition must be balanced at all times: each cluster must contain exactly $k$ nodes. If we migrate a single node $u$ from a cluster $A$ to a cluster $B$, we must (1) migrate another node to fill the place of $u$ in $A$, and (2) evict a node from $B$ to another cluster.
+
+\DET keeps saturated edges inside clusters, hence a migration of a single node may entail migrations of other nodes.
+If the migrated node $u$ is already connected with a saturated edge with another node $u'$, we must migrate both of them. In turn, $u'$ may have a saturated edge to yet another node. Precisely, to maintain the invariant, we must migrate nodes in groups that correspond to connected components in the graph of saturated edges.
+
+We refer to the set of nodes inside a connected component in the graph of saturated edges as \emph{component}.
+A saturation of an edge \emph{merges} two components.
+Components are unsplittable --- their nodes must be collocated.
+In each reconfiguration we must assure that each cluster contains exactly $k$ nodes, and to satisfy this condition, \DET may move multiple components between clusters.
+
+
+\subsection{Bounding the repartition cost.}
+
+In \cite{repartition-disc}, authors trivially bounded the cost of a single reconfiguration 
+of \DET
+by
+$k \cdot \ell$ (the proof is given also in this
+manuscript in Theorem~\ref{th:detsqare}).
+This roughly corresponds to migrating every node in every cluster, and possibly can be improved.
+
+In \cite{disc2020}, the authors improved the analysis of \DET for
+unsaturated edges (that may incur the cost $O(k^2\cdot \ell^2)$).
+Precisely, the improved competitive ratio is $O(k\cdot \ell \cdot f(k, \ell))$, where $f(k,
+\ell)$ is a bound on the cost of a single repartition.
+
+
+The best known lower bound for a competitive ratio of any deterministic algorithm is $\Omega(k\cdot \ell)$ \cite{disc2020}.
+The best lower bound for a cost of a single repartition is $\Omega(k^3)$.
+\maciek{Note to myself: show the $\Omega(k^3)$ costly reconfiguration example}
+
+\medskip
+
+In this manuscript, we state two hypotheses. Proving any of them brings an
+immediate improvement to the competitive ratio of \DET.
+
+\begin{hypothesis}\textbf{Strong cascade hypothesis.} The cost of a single
+reconfiguration of \DET can be bounded by $f$ that does not depend on $\ell$.
+\end{hypothesis}
+
+\begin{hypothesis}
+    \textbf{Weak cascade hypothesis.}
+The cost of a single reconfiguration of \DET can be bounded by $f$ that is $o(\ell)$ (i.e., the dependency on $\ell$ is
+sublinear).
+\end{hypothesis}
+
+In both hypotheses, the cost of reconfiguration may be exponential in $k$.
+One can think that $k$ is usually small in comparison to $\ell$.
+
+The task is to prove weak and strong cascade hypotheses or provide a
+counterexample.
+
+
+
+\subsection{Characterization of the migration graph.}
+
+
+To help analyzing the cost of a reconfiguration, we introduce a \emph{migration graph} that models the reconfiguration.
+In the following, we characterize the structure of the migration graph.
+
+\noindent
+\textbf{Vertices of the migration graph and the core vertices.}
+The vertices of the migration graph are all $\ell$ clusters of the instance.
+We distinguish the \emph{core vertices} that correspond to clusters directly involved in the merge operation: the clusters containing the to-be-merged components in $C_I$ and the cluster containing the merged component in $C_F$.
+There are at most $3$ core vertices in each migration graph (at most two components participate in the merge, and these may migrate to a third cluster).
+
+\noindent
+\textbf{Edges and their labels.}
+The edges of the migration graph denote the migration of nodes from $C_I$ to $C_F$.
+Each edge is labeled with a set of components that migrate between clusters.
+The components are indistinguishable, hence the label is a multiset of component
+sizes.
+The \emph{weight} of an edge is the sum of sizes of components of its label.
+Each edge is directed from the cluster that contained the nodes to the cluster they migrated to.
+Both edges might exists between a pair of nodes, as whole components of nodes migrate, and the back-and-forth exchange may be needed for the configuration $C_F$ to be component-respecting.
+
+\noindent
+\textbf{Vertex degree.}
+At most $k$ nodes may migrate from a cluster and at most $k$ nodes may migrate into a cluster.
+Thus, the sum of the labels for both ingoing and outgoing edges of each vertex is at most $k$.
+This implies that the number of ingoing and outgoing edges is also bounded by $k$.
+
+\noindent
+\textbf{Flow preservation.}
+In any configuration (including $C_I$ and $C_F$), each cluster contains exactly $k$ nodes.
+Thus, for any vertex, the sum of labels of ingoing edges must equal the sum of labels of outgoing edges.
+
+\noindent
+\textbf{Migration graph and the cost of reconfiguration.}
+The cost of cluster reconfiguration equals the number of exchanged nodes multiplied by $\alpha$.
+From the standpoint of a migration graph, this corresponds to the sum of labels on edges of the graph.
+A trivial upper bound on the cost is the size of the connected component in the migration graph multiplied by $2\alpha k$.
+
+\medskip
+
+Note that for a single component merge, multiple migration graphs may exist (it
+depends on the choice of the algorithm), and multiple of them might have the optimal cost.
+
+\subsubsection{Rules of the cascade graph optimality}
+
+Flow conservation and degree bounds are the properties of each feasible cascade.
+An optimal-cost cascade must have additional properties:
+\begin{enumerate}
+    \item Shortcutting the intermediate set \maciek{todo}
+    \item Shortcutting the cycles \maciek{Is it an instance of the previous one?}
+\end{enumerate}
+
+\subsubsection{Cascade graph with full information}
+
+Additional information: for each vertex we have the multiset of its component sizes in its label.
+
+ToDo: search for additional rules that actually imply that each cascade graph with these properties is always the minimum cost reconfiguration.
+
+\section{Tasks}
+
+\subsection{Whiteboard tasks --- Various upper and lower bounds on the cascade.}
+
+
+Cascade example is an initial configuration of components and a new saturated edge.
+We'll search for cascade examples with certain property $P$ of its cascade graphs.
+To claim that a cascade example have the property $P$, we must prove $P$ for each minimum cascade graph that leads to a component-respecting partition after saturation.
+
+\begin{task}[Migrate as many singletons as possible]
+Show a cascade example with $g(k,l)$ singletons migrating, for as large $g$ as possible (asymptotically).
+\end{task}
+
+
+\begin{task}[The maximum number of migrating singletons.]
+Show an upper bound $h(k,l)$ on the number of singletons that can migrate in any cascade.
+\end{task}
+
+\begin{task}[Examples for larger components.]
+Let $S$ be any of $\{ \Theta(\log(k)), \Theta(\sqrt(k)), \Theta(k)\}$.
+Show a cascade example with $g(k,l)$ components of size $S$ migrating.
+Show an upper bound $h(k,l)$ on the number of components of size $S$ that can migrate in any cascade.
+\end{task}
+
+\begin{task}[Cascade dependency on component sizes.]
+Assume all components are of size at most $s$.
+Show an upper bound $h(k,l,s)$ on the cost of cascade.
+\end{task}
+
+\begin{task}[Cascade dependency on number of saturated edges.]
+
+Let $s$ be a number of saturated edges.
+Find the smallest $h(s)$ that bounds the cost of cascade.
+\end{task}
+
+\begin{task}[Migrate all sizes of components.]
+
+Show a cascade example where all component sizes ($\{1,2, \ldots, k\}$) migrate.
+Show a cascade example where $2$ different components of sizes $1$ and $2$ and $3,\ldots k$ migrate.
+
+Show a cascade example where $\log(k)$ different components of sizes $1, 2, \ldots, \log(k)$ migrate.
+\end{task}
+
+\begin{task}[Paths, cycles and ears.]
+Show an example of a cascade, where exists a vertex reachable from a core vertex that is not on any simple path (i.e., without repeating vertices) between core vertices.
+\end{task}
+
+\begin{task}[Cascade graph example with no 2-edge cycles.]
+
+Show an example of a cascade graph, where each non-core vertex participates only in cycles of length $3$ or more.
+\end{task}
+
+\subsection{Programming tasks.}
+In this section we propose a number of programming tasks. Their main objective
+is to help understanding the problem. Moreover, the tools may be used to quickcheck 
+if the cascade graph has certain properties.
+
+
+\begin{task}[Minimum cost cascade.]
+
+We are given integers $k$, $\ell$, an initial configuration $C_I$ of clusters (the
+sizes of components in each cluster), and distinguished components $A$ and
+$B$ that are present in the initial configuration.
+We say that a configuration is feasible if each component is entirely contained
+in a single cluster (i.e., no component is split), and each cluster contains
+exactly $k$ nodes.
+
+The objective is to perform a merge operation of $A$ and $B$. Precisely,
+\begin{enumerate}
+    \item Determine if there exists a feasible configuration of clusters after
+        the merge.
+    \item Find a feasible configuration that is closest to $C_I$ (the number of
+        node migrations is minimized).
+    \item If multiple configurations with minimum cost exists, find all of them.
+\end{enumerate}
+
+\noindent
+\textbf{Implementation.}
+Use existing tools such as Mixed-Integer Programming solvers, CP-SAT solvers or
+other libraries, specialized in searching spaces of exponential size.
+Do not implement your own solutions unless justified.
+
+\noindent The solution must be exponential due to NP-completeness of $\ell$-way integer
+partition \cite{AndRae06}.
+\subsection{Unique minimum cost cascade.}
+Multiple min-cost cascades exists, and many of them may be isomorphic. Propose a
+simple rule to determine a unique cascade (e.g. the cascade with components of
+minimum index, where index is a component ID). The rule should be easy to
+express mathematically and easy to implement.
+\end{task}
+
+\begin{task}[Cascade graph analysis.]
+
+Fix a cascade graph, and let $C_F$ be the final configuration.
+The \emph{core} vertices of the cascade graph are: the cluster that contains $A$
+in $C_I$, the cluster that contains $B$ in $C_I$, and the cluster that contains
+$A\cup B$ in $C_F$.
+
+Determine the following properties of the given cascade graph:
+\begin{enumerate}
+    \item The length of the longest simple cycle (i.e., without repeating
+        vertices).
+    \item Existence of ears: vertices that do not belong to any simple cycle
+        that contains a core vertex.
+\end{enumerate}
+
+\end{task}
+
+\begin{task}[Generating initial configurations.]
+
+Automate graph analysis. Generate feasible initial configurations and the
+merged pair of components $A$ and $B$. Two
+possible solutions:
+\begin{enumerate}
+    \item Use
+random feasible configurations.
+\item Enumerate over all possible non-isomorphic configurations for a given small $k$
+    and $\ell$.
+\end{enumerate}
+\end{task}
+
+
+\section{Julien's adventures with cascade}
+
+\subsection{Integer programs that solve 1 request cascade}
+
+\subsubsection{Minimum cost cascade}
+
+We are given two natural numbers $k$ and $\ell$, a set of components $\mathcal{C}$ ($|\mathcal{C}| = m$), and a set of clusters (ToR's) $\mathcal{T}$ ($|\mathcal{T} = \ell$).
+We are given and sizes of these components $\mathcal{S} : \mathcal{C} \Rightarrow \mathbb{N}$.
+We are given an initial assignment (placement) of components to clusters, i.e., a boolean function $B : \mathcal{C} \times \mathcal{T}$ that is true iff. the component $c \in \mathcal{C}$ is initially in cluster $t \in \mathcal{T}$.
+New saturated edge appears between two distinguished components $A, B \in \mathbb{C}$.
+
+The $IP_1$ is formulated as follows.
+Let $x_{i,j}$ be a boolean variable that we interpret as if a component $i$ is in the final configuration in cluster $j$.
+
+\[
+    \min \sum_{c \in \mathcal{C}} \sum_{t \in \mathcal{T}} (1-B(c, t)) \cdot S(c) \cdot x_{c,t} 
+\]
+with respect to the following constraints:
+\begin{equation}
+  \forall_{t\in \mathcal{T}} \sum_{c \in \mathcal{C}} S(c) \cdot x_{c,t} = k
+  \label{eq:capacity-constraints-ip1}
+\end{equation}
+\begin{equation}
+    \forall_{c\in \mathcal{C}} \sum_{t \in \mathcal{T}} x_{c,t} = 1
+    \label{eq:constraint-single-placement-ip1}
+\end{equation}
+\begin{equation}
+    \forall_{t \in \mathcal{T}} x_{A,t} = x_{B, t}
+    \label{eq:constraint-merge-ip1}
+\end{equation}
+\begin{equation}
+    \forall_{c\in \mathcal{C}} \forall_{t\in \mathcal{T}} x_{c, t} \in \{ 0, 1 \}
+\end{equation}
+
+
+We interpret the constraints in the following way: \ref{eq:capacity-constraints-ip1}  means that the capacity of clusters must by obeyed, \ref{eq:constraint-single-placement-ip1} means that each component can be at one cluster in the final configuration, \ref{eq:constraint-merge-ip1} means that distinguished components $A$ and $B$ are collocated.
+
+\subsubsection{Closest to initial cascade}
+
+\subsubsection{Closest to initial cascade and among them, the cheapest}
+
+\subsubsection{Minimum cascade and among them, the closest to initial configuration}
+
+\subsubsection{Per-node IP for closest to initial cascade}
+
+Variable $y_{n,t}$
+
+\subsection{Costly cascades}
+
+\subsubsection{k/2 cost cascade with at most sqrt size of components}
+
+\subsubsection{$O(k^2)$ cost cascade for $\ell$ servers}
+
+\subsection{k log k cost of a phase hypothesis for two servers}
+
+- full cost model
+
+\bibliographystyle{alpha}  
+\bibliography{references}  
+
+
+\appendix
+
+
+\end{document}
