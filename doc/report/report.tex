@@ -108,9 +108,9 @@ Such techniques are especially useful in (but not limited to) computationally-in
 \pagebreak
 
 \medskip
-The first part of this thesis assumes the perspective of a data center owner, who wants to~use owned resources in an efficient manner.
+The first part of this chapter assumes the perspective of a data center owner, who wants to~use owned resources in an efficient manner.
 For example, the processing speed can be scaled down to save energy, memory can be shared or distributed, and cooperating processes can be migrated closer to each other in the network to save bandwidth.
-In the first part of this thesis, we focus on the~last aspect and we show how it leads to
+In the first part of this chapter, we focus on the~last aspect and we show how it leads to
 \emph{efficient usage of an interconnecting network} in a data center.
 Optimization of this resource is critical for performing efficient large-scale computations, as these involve multiple machines that cooperate over the network.
 To this end, we will make use of a~sophisticated control system, called \emph{virtualization}.
@@ -120,7 +120,7 @@ To this end, we will make use of a~sophisticated control system, called \emph{vi
 \label{sec:intro-machine-virtualization}
 
 To use the data center's interconnecting network efficiently, cooperating computational tasks should be placed close to each other and close to the data they process.
-Algorithmic techniques presented in the first part of this thesis rely upon logical isolation of a computation from the~physical machine that performs the computation.
+Algorithmic techniques presented in the first part of this chapter rely upon logical isolation of a computation from the~physical machine that performs the computation.
 This gives a~possibility to manage the~physical placement of a computation in a way that is transparent to the computation.
 A~particular piece of technology that provides the flexibility in placement of computations is~\emph{virtualization}.
 
@@ -159,8 +159,8 @@ algorithms that find a good trade-off between the inter-server communication
 cost and the migration cost.
 %
 %Such mechanisms play an~important role in load balancing in the data center and allow for sophisticated optimizations such as \emph{reducing network distance between communicating virtual machines}.
-%In this thesis, we focus on migration capabilities provided by modern virtualization technologies used for efficient usage of important resource in the data center --- the network bandwidth.
-The problem central to the first part of this thesis is stated as follows:
+%In this chapter, we focus on migration capabilities provided by modern virtualization technologies used for efficient usage of important resource in the data center --- the network bandwidth.
+The problem central to the first part of this chapter is stated as follows:
 
 \begin{center}
   \emph{How to assign virtual machines to physical machines to optimize network
@@ -176,7 +176,7 @@ Therefore, data centers provide their resources as a sizeable set of virtual mac
 Collectively, the virtual machines with their interconnecting network are called a~\emph{virtual network}, where the cooperating virtual machines are referred to as \emph{nodes} of a virtual network.
 To~guarantee a certain quality of service (\emph{QoS}) for a multitude of co-existing virtual networks, up-front bandwidth reservations are required.
 However, the generality of performed calculations results in an unpredictability of communication patterns and poses a challenge in the optimization of bandwidth reservations.
-In this thesis, we provide algorithms for an efficient management of~network reservations without any assumptions about communication patterns.
+In this chapter, we provide algorithms for an efficient management of~network reservations without any assumptions about communication patterns.
 \subsubsection{Dynamic Mapping of Virtual Networks}
 \label{sec:contributions-dynamic-mapping}
 
@@ -251,14 +251,14 @@ generate large amounts of network traffic~\cite{orchestra,MogPop12,amazonbw},
 and over the last years, several systems have been proposed that provide a provable network performance.
 To guarantee a certain performance level, these systems reserve a portion of bandwidth among cooperating nodes.
 There are two major approaches to bandwidth reservations: some systems depend on supplying the possibly different volume of bandwidth communication between each pair of nodes~\cite{faircloud,elasticswitch,seawall}, while other systems allocate abundant bandwidth of equal volume among all nodes~\cite{oktopus,secondnet,drl,gatekeeper,proteus}.
-In this thesis we research both approaches: in Chapter~\ref{ch:static-mapping} we pre-reserve a portion of bandwidth among all cooperating nodes, while in Chapter~\ref{ch:dynamic-mapping} we perform the reservation as pairs of nodes communicate.
+In this chapter we research both approaches: in Chapter~\ref{ch:static-mapping} we pre-reserve a portion of bandwidth among all cooperating nodes, while in Chapter~\ref{ch:dynamic-mapping} we perform the reservation as pairs of nodes communicate.
 
 \medskip
 
 In Chapter~\ref{ch:static-mapping}, we study virtual network embeddings, a problem of embedding a weighted \emph{guest} graph into a capacitated \emph{host} graph.
 The virtual network embedding problem is related to~classic VPN graph embedding problems~\cite{gupta2001provisioning,vpn1, vpn2, Goyal2008},
 a~problem that is NP-hard, and is constant-factor approximable even for asymmetric traffic demands~\cite{vpn-apx}.
-The VPN problem requires finding a graph embedding with fixed endpoints, while in virtual network embedding problems, studied in this thesis, the embedding endpoints are also subject to optimization.
+The VPN problem requires finding a graph embedding with fixed endpoints, while in virtual network embedding problems, studied in this chapter, the embedding endpoints are also subject to optimization.
 In this respect, the virtual network embedding problem can also be seen as related to
 classic Minimum Linear Arrangement problem~\cite{EvNaRS99,ord-prob} which asks for the
 embedding of communication graphs on simple line topologies.
@@ -271,7 +271,7 @@ and sometimes redundant file system. Since moving
 data is costly, an embedding algorithm should be aware of the data placement,
 and allocate computational resources close to the data.
 Redundant storage gives additional optimization possibilities.
-In this thesis, we study data locality and replica-aware virtual network embeddings in tree topologies.
+In this chapter, we study data locality and replica-aware virtual network embeddings in tree topologies.
 %Note that our variant is not strictly a~generalization of a virtual network embedding, as we took simplifying assumptions about the traffic demands.
 
 \medskip
