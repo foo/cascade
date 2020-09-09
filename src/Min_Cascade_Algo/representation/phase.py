@@ -49,8 +49,8 @@ class Phase:
         node_list = configuration.get_id_list()
        
         # todo: all pairs of clusters should be unique (now we consider each pair twice)
-        for cluster1 in configuration.cluster_list:
-            for cluster2 in configuration.cluster_list:
+        for idc1, cluster1 in configuration.cluster_list:
+            for idc2, cluster2 in configuration.cluster_list:
                 if not cluster1 == cluster2:
                     comps1 = cluster1.comp_list
                     comps2 = cluster2.comp_list
