@@ -97,6 +97,12 @@ class Phase:
     # (now is a function of: configuration + request)
     def max_phase_aux(self, configuration):
 
+        # todo: cascade calculation inside the for loop
+        # (interface for memoization)
+        #
+        # use hashable arguments for the function
+        # (not objects, but graph.cluster_list (flattened to non-objects in components too))
+
         # print("max_phase")
         # # apply the current request
 
