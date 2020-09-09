@@ -49,36 +49,62 @@ class Phase:
         node_list = configuration.get_id_list()
        
         # todo: all pairs of clusters should be unique (now we consider each pair twice)
-        for idc1, cluster1 in configuration.cluster_list:
-            for idc2, cluster2 in configuration.cluster_list:
-                if not cluster1 == cluster2:
+        for idc1, cluster1 in enumerate(configuration.cluster_list):
+            for idc2, cluster2 in enumerate(configuration.cluster_list):
+                if idc1 < idc2: # consider each pair of clusters once
                     comps1 = cluster1.comp_list
                     comps2 = cluster2.comp_list
 
-                    comps1unique = comps1
-                    comps2unique = comps2
+                    # print("comps1 ", comps1)
+                    # print("comps2 ", comps2)
 
-                    for i in comps1unique:
-                        for j in comps2unique:
-                            requests.append([i.id, j.id])
 
-        print("requests ", requests)
+                    comps1sizes = map(lambda c: (c.size, c), comps1)
+                    comps2sizes = map(lambda c: (c.size, c), comps2)
+
+                    comps1sort = sorted(comps1sizes, key=lambda c: c[0])
+                    comps2sort = sorted(comps2sizes, key=lambda c: c[0])
+ 
+                    # print("comps1sizes ", list(comps1sizes))
+                    # print("comps2sizes ", list(comps2sizes))
+ 
+                    # print("comps1sort", list(comps1sort))
+                    # print("comps2sort ", list(comps2sort))
+
+
+ 
+
+                    comps1unique = (groupby(comps1sort, lambda s: s[0]))
+                    comps2unique = (groupby(comps2sort, lambda s: s[0]))
+
+                    # print("comps1unique ", list(comps1unique))
+                    # print("comps2unique ", list(comps2unique))
+
+                    for key1, group1 in comps1unique:
+                        g1 = list(group1)
+                        # print("key ", key1, g1[0][1].id)
+                        for key2, group2 in comps2unique:
+                            g2 = list(group2)
+                            requests.append([g1[0][1].id, g2[0][1].id])
+
+
+        # print("requests ", requests)
         return requests
 
 
     def max_phase_aux(self, configuration):
 
-        print("max_phase")
-        # apply the current request
+        # print("max_phase")
+        # # apply the current request
 
-        print("current request")
-        print(configuration.comps_to_merge)
-        print("ids")
-        print(configuration.to_string_ids())
+        # print("current request")
+        # print(configuration.comps_to_merge)
+        # print("ids")
+        # print(configuration.to_string_ids())
  
         is_cascade_possible, graph_changes = cascade_calculation.Calculation.possible_cascade(configuration)
 
-        print("can continue?")
+        # print("can continue?")
         can_phase_continue = is_cascade_possible == 1
         if not can_phase_continue:
             return 0
@@ -96,28 +122,28 @@ class Phase:
         requests = self.all_requests(configuration)
         assert(not requests == [])
 
-        print("requests r")
-        print(requests)
+        # print("requests r")
+        # print(requests)
 
         max_remaining_cost = 0
         max_cost_branch = None
 
         # comment about branches
         for r in requests:
-            print("consider request ", r)
+            # print("consider request ", r)
             configuration_branch = copy.deepcopy(configuration)
             configuration_branch.comps_to_merge = r
 
             branch_cost = self.max_phase_aux(configuration_branch)
-            print("current_cost ", current_request_cost)
-            print("branch_cost ", branch_cost)
+            # print("current_cost ", current_request_cost)
+            # print("branch_cost ", branch_cost)
 
             if max_remaining_cost <= branch_cost:
                 max_remaining_cost = branch_cost
                 max_cost_branch = configuration_branch
         
         # glue the history
-        print("max rem", max_remaining_cost)
+        # print("max rem", max_remaining_cost)
 
         assert(not (max_cost_branch == None))
         return max_remaining_cost + current_request_cost
