@@ -12,6 +12,12 @@ import pulp
 k = int(sys.argv[1])
 l = int(sys.argv[2])
 
+# todos:
+# nuitka3 + readme
+# run infinite from k=<parameter>
+# print the actual cascades
+# move the logic outside of phase class?
+
 def run():
     moves = []
     cascade_repartition = np.zeros(int(np.log2(k)))

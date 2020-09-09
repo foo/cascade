@@ -37,6 +37,7 @@ class Phase:
         return max_cost
     
     # the first request is between arbitrary nodes of different clusters
+    # (in principle, it would be possible to use all_requests that should return the same)
     def first_request(self, configuration):
         node_list = configuration.get_id_list()
         nodes_cluster1 = node_list[0]
@@ -48,7 +49,6 @@ class Phase:
         requests = []
         node_list = configuration.get_id_list()
        
-        # todo: all pairs of clusters should be unique (now we consider each pair twice)
         for idc1, cluster1 in enumerate(configuration.cluster_list):
             for idc2, cluster2 in enumerate(configuration.cluster_list):
                 if idc1 < idc2: # consider each pair of clusters once
@@ -81,6 +81,7 @@ class Phase:
                     # print("comps2unique ", list(comps2unique))
 
                     for key1, group1 in comps1unique:
+                        # maciek: should just take the first item of an iterator
                         g1 = list(group1)
                         # print("key ", key1, g1[0][1].id)
                         for key2, group2 in comps2unique:
@@ -91,7 +92,9 @@ class Phase:
         # print("requests ", requests)
         return requests
 
-
+    # todo: memoization
+    # but first, rewrite as a function of configuration only,
+    # (now is a function of: configuration + request)
     def max_phase_aux(self, configuration):
 
         # print("max_phase")
@@ -131,6 +134,7 @@ class Phase:
         # comment about branches
         for r in requests:
             # print("consider request ", r)
+            #maciek: probably deepcopy is too much?
             configuration_branch = copy.deepcopy(configuration)
             configuration_branch.comps_to_merge = r
 

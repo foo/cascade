@@ -1,0 +1,19 @@
+k=2, max_cost=2
+
+k=3, max_cost=6
+
+k=4, max_cost=10
+
+k=5, max_cost=18
+
+k=6, max_cost=24
+
+k=7, max_cost=32
+
+k=8, max_cost=42
+
+k=9, max_cost=50 
+
+k=10, max_cost=60
+
+k=11, max_cost=70
