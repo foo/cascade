@@ -180,6 +180,8 @@ class Graph:
             c.apply_cascade(id_move1, id_move2)
 
     def get_cluster(self, id):
+        # maciek: I wonder why we need to search for a cluster id instead of accessing id-th cluster
+
         for c in self.cluster_list:
             if c.id == id:
                 return c
@@ -251,6 +253,16 @@ class Graph:
             for c in self.cluster_list:
                 tmp += c.to_string() + "\n"
             return tmp
+    
+    def to_string_ids(self):
+        tmp = ""
+        for cl in self.cluster_list:
+            for comp in cl.comp_list:
+                tmp += str(comp.id_list)
+            tmp += "\n"
+        return tmp
+
+
 
     def to_beautiful_string(self, thickness=5, gap_btw_clusters=2):
         tmp_string = ""
