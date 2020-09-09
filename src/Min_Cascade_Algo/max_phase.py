@@ -12,11 +12,12 @@ import pulp
 k = int(sys.argv[1])
 l = int(sys.argv[2])
 
-# todos:
+# todos (Maciek's cleanup):
+# 1. move the new code outside of phase class: two classes: RandomPhase and MaxPhase
+# 2. print the actual cascades (glue the history)
+# 3. print the classification of requests into phases
 # nuitka3 + readme
 # run infinite from k=<parameter>
-# print the actual cascades
-# move the logic outside of phase class?
 
 def run():
     moves = []
