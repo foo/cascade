@@ -1,4 +1,4 @@
-from representation import graph, phase
+from representation import graph, random_phase
 from algos import cascade_calculation
 from pathlib import Path
 import sys

@@ -1,4 +1,4 @@
-from representation import graph, phase
+from representation import graph, random_phase
 from algos import cascade_calculation
 from pathlib import Path
 import sys
@@ -30,7 +30,7 @@ def run():
     for i in range(trial_number):
         tmp_cascade_repartition = np.zeros(int(np.log2(k)))
         t0 = time.time()
-        p = phase.Phase(k, l, choose_mode)
+        p = random_phase.RandomPhase(k, l, choose_mode)
         p.start_phase()
 
         # TO COMPUTE THE MAX COST OF A PHASE

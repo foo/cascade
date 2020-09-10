@@ -1,4 +1,4 @@
-from representation import graph, phase
+from representation import graph, max_phase
 from algos import cascade_calculation
 import sys
 import time
@@ -22,7 +22,7 @@ l = int(sys.argv[2])
 def run():
     moves = []
     cascade_repartition = np.zeros(int(np.log2(k)))
-    p = phase.Phase(k, l)
+    p = max_phase.MaxPhase(k, l)
     p.max_phase(k, l)
 
 profile = False
