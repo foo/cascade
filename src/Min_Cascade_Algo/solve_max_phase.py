@@ -20,6 +20,7 @@ l = int(sys.argv[2])
 # run infinite from k=<parameter>
 
 def run():
+    print("Starting the max phase for k =", k, " l =",l)
     moves = []
     cascade_repartition = np.zeros(int(np.log2(k)))
     p = max_phase.MaxPhase(k, l)
