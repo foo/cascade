@@ -21,10 +21,12 @@ l = int(sys.argv[2])
 
 def run():
     print("Starting the max phase for k =", k, " l =",l)
+    sys.stdout.flush()
     moves = []
     cascade_repartition = np.zeros(int(np.log2(k)))
     p = max_phase.MaxPhase(k, l)
     p.max_phase(k, l)
+    sys.stdout.flush()
 
 profile = False
 if profile:
