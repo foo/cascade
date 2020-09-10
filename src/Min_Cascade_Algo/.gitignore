@@ -1,5 +1,6 @@
 ./Clusters/
 ./.idea/
+./.vscode
 ./algos/__pycache__/
 ./evaluation/__pycache__/
 ./representation/__pycache__/
