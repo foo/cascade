@@ -1,25 +1,33 @@
-
+------------------------------------------------------------------------------------------
 REQUIRED LIBRARIES ---------------------------------------------------------------------
-You must have pulp, numpy and random
+Python dependencies: 
+$ pip3 install pulp numpy matplotlib
 
-PHASE TRIALS AND HYPOTHESIS CHECKINGS ----------------------------------------------------
-For example, enter: python solve_phase.py classic 30 2 1000
-4 args:
-    - first one is the mode: classic for merges to be only btw different clusters, general for it to be btw every 2 clusters, intra_cluster_only for it to be in the same cluster only.
-    - second one is k, capacity of each cluster
-    - third one is l, number of clusters
-    - fourth one is the number of trials, so the number of phases that will be done
-A phase starts with l clusters, filled with singletons. The program will try to merge 2 compoenents at each steps, until a merge fails.
-In solve_phase.py, there is the main for loop that tries every phase. For now, the properties that we want to check are tested in this loop. 
+External software dependencies:
+GLPK
+------------------------------------------------------------------------------------------
 
+------------------------------------------------------------------------------------------
+LIST OF EXECUTABLES ----------------------------------------------------------------------
+------------------------------------------------------------------------------------------
 
-ONE CASCADE SOLVING -------------------------------------------------------------------
-the graphes are represented with strings as follows:
+solve_cascade.py
+solve_random_phase.py
+solve_max_phase.py
+
+------------------------------------------------------------------------------------------
+SOLVING A SINGE CASCADE INSTANCE --------------------------------------------------------
+------------------------------------------------------------------------------------------
+
+Describe the configuration and components to be merged (in a file, see below).
+Run solve_cascade.py with no arguments.
+
+the graphs are represented with strings as follows:
     - each line represent a cluster. Each integer on this line is the size of a component that is contained in the cluster
     - n and m integers, n^m means that components of size n are repeated m times
     - to indicate what components should be merged, put a '*' right after the 2 components to be merged
 
-for exemple, the graph:
+For example, the graph:
     1st cluster : components of sizes 8 and 4
     2nd cluster : components of sizes 8 and 4
     3rd cluster : twelve components of sizes 1
@@ -29,11 +37,38 @@ has this representation:
 4* 8
 1^12
 
-HOW TO RUN IT -------------------------------------------------------------------------------
-run: python -m evaluation.test.py
-before that, you can change the inputs by changing the variable graph_file_address. It must be the address of a text file organised as shown above
+The path to the input is provided in the variable graph_file_address (default: evaluation/graph_test2.txt). 
 
-HOW ARE COMPONENTS INDEXED ? ----------------------------------------------------------------
-    - to indicate what components must merge together, the algo give every components an index (= id).
-      How do we find the index ? From left to right, from above to below, count the components starting from 0.
-      For exemple on the graph above, the 4 on the 1st cluster has index 0, the 8 on the 2nd cluster has index 3
+------------------------------------------------------------------------------------------
+RANDOM PHASE AND HYPOTHESIS CHECKINGS ----------------------------------------------------
+------------------------------------------------------------------------------------------
+
+Usage example: python3 solve_random_phase.py classic 30 2 1000
+4 args:
+    - first one is the mode: classic for merges to be only btw different clusters, general for it to be btw every 2 clusters, intra_cluster_only for it to be in the same cluster only.
+    - second one is k, capacity of each cluster
+    - third one is l, number of clusters
+    - fourth one is the number of trials, so the number of phases that will be done
+A phase starts with l clusters, filled with singletons. The program will try to merge 2 components at each steps, until a merge fails.
+In solve_phase.py, there is the main for loop that tries every phase. For now, the properties that we want to check are tested in this loop. 
+
+
+
+------------------------------------------------------------------------------------------
+MAXIMUM COST PHASE  ----------------------------------------------------
+------------------------------------------------------------------------------------------
+
+Usage example: python3 solve_max_phase 10 2
+
+(2 arguments: k and l)
+
+The program returns the cost of the most costly phase.
+
+
+------------------------------------------------------------------------------------------
+NOTE ON PERFORMANCE ----------------------------------------------------
+------------------------------------------------------------------------------------------
+
+Install nuitka: $ pip3 install nuitka
+Compile a python script: $ python3 -m nuitka solve_max_phase.py
+Run the compiled version: $ ./solve_max_phase.bin 10 2

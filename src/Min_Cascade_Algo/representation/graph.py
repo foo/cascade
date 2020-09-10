@@ -2,6 +2,17 @@ from representation import cluster, counter, cascade_changes
 import numpy as np
 import random as rd
 
+# HOW ARE COMPONENTS INDEXED ? ----------------------------------------------------------------
+#     - to indicate what components must merge together, the algo give every components an index (= id).
+#       How do we find the index ? From left to right, from above to below, count the components starting from 0.
+
+# 4* 8
+# 4* 8
+# 1^12
+
+#       For example, in the graph above, the 4 on the 1st cluster has index 0, the 8 on the 2nd cluster has index 3
+
+
 
 class Graph:
 
