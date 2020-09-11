@@ -17,3 +17,5 @@ k=9, max_cost=50
 k=10, max_cost=60
 
 k=11, max_cost=70
+
+k=12, max_cost=84
