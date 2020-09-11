@@ -34,7 +34,6 @@ class MaxPhase:
 
         configuration.comps_to_merge = self.first_request(configuration)
         max_cost = self.max_phase_aux(configuration)
-        print("max_cost", max_cost)
         return max_cost
     
     # the first request is between arbitrary nodes of different clusters

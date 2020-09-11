@@ -25,7 +25,8 @@ def run():
     moves = []
     cascade_repartition = np.zeros(int(np.log2(k)))
     p = max_phase.MaxPhase(k, l)
-    p.max_phase(k, l)
+    max_cost = p.max_phase(k, l)
+    print("max_cost is", max_cost)
     sys.stdout.flush()
 
 profile = False
