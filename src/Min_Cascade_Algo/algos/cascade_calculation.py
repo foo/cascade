@@ -41,6 +41,7 @@ class Calculation:
         # solver = p.PULP_CBC_CMD( msg=0)
 
         solver = p.GLPK_CMD(msg=0)
+        # solver = p.GUROBI_CMD(msg=0)
         Lp_prob.solve(solver)
 
         # Comunicating the results to create a new graph
